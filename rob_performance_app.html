@@ -4,742 +4,246 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>RD33 — Performance Journal</title>
-
-<!-- PWA / Add to Home Screen -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RD33">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#080A0F">
 <link rel="manifest" href="manifest.json">
-
-<!-- Apple touch icons (inline SVG encoded as data URI) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%23080A0F'/%3E%3Ctext x='256' y='320' font-family='Arial Black,sans-serif' font-size='260' font-weight='900' fill='%23F59E0B' text-anchor='middle'%3E33%3C/text%3E%3Ctext x='256' y='430' font-family='Arial,sans-serif' font-size='72' fill='%23E11D48' text-anchor='middle' letter-spacing='8'%3ERD%3C/text%3E%3C/svg%3E">
-
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --black:    #080A0F;
-    --deep:     #0D1117;
-    --card:     #111827;
-    --border:   #1F2937;
-    --border2:  #374151;
-    --text:     #E5E7EB;
-    --muted:    #6B7280;
-    --dimmed:   #374151;
-    --gold:     #F59E0B;
-    --gold2:    #FCD34D;
-    --red:      #EF4444;
-    --green:    #10B981;
-    --yellow:   #F59E0B;
-    --blue:     #3B82F6;
-    --accent:   #E11D48;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--black);
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── BACKGROUND TEXTURE ── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(225,29,72,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 40% at 90% 90%, rgba(245,158,11,0.04) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 0 16px 80px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── HEADER ── */
-  .header {
-    padding: 32px 0 24px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 32px;
-  }
-
-  .header-badge {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-
-  .header h1 {
-    font-family: 'Bebas Neue', cursive;
-    font-size: clamp(42px, 10vw, 64px);
-    letter-spacing: 4px;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .header h1 span { color: var(--gold); }
-
-  .header-sub {
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 300;
-  }
-
-  /* ── TABS ── */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--deep);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 28px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-
-  .tab {
-    flex: 1;
-    min-width: 70px;
-    padding: 10px 8px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.2s;
-    white-space: nowrap;
-    text-align: center;
-  }
-
-  .tab.active {
-    background: var(--accent);
-    color: white;
-  }
-
-  .tab:hover:not(.active) {
-    background: var(--border);
-    color: var(--text);
-  }
-
-  /* ── PANELS ── */
-  .panel { display: none; }
-  .panel.active { display: block; animation: fadeUp 0.3s ease; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── SECTION LABEL ── */
-  .section-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* ── CARD ── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-  }
-
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* ── GRID ── */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-
-  /* ── FIELD ── */
-  .field { display: flex; flex-direction: column; gap: 6px; }
-
-  .field label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-
-  .field input,
-  .field select,
-  .field textarea {
-    background: var(--deep);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    padding: 11px 14px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    width: 100%;
-    outline: none;
-    -webkit-appearance: none;
-  }
-
-  .field input:focus,
-  .field select:focus,
-  .field textarea:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(245,158,11,0.1);
-  }
-
-  .field textarea { resize: vertical; min-height: 70px; }
-
-  .field select option { background: var(--deep); }
-
-  /* Number inputs */
-  .field input[type="number"] {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
-  }
-
-  /* ── SLIDER ── */
-  .slider-wrap { display: flex; align-items: center; gap: 12px; }
-
-  .slider-wrap input[type="range"] {
-    flex: 1;
-    -webkit-appearance: none;
-    height: 4px;
-    background: var(--border2);
-    border-radius: 2px;
-    border: none;
-    padding: 0;
-    box-shadow: none;
-  }
-
-  .slider-wrap input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--gold);
-    cursor: pointer;
-    border: 2px solid var(--black);
-  }
-
-  .slider-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--gold);
-    min-width: 28px;
-    text-align: center;
-  }
-
-  /* ── STATUS PILLS ── */
-  .status-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 4px;
-  }
-
-  .status-pill {
-    padding: 8px 4px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    text-align: center;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.15s;
-    background: var(--deep);
-  }
-
-  .status-pill:hover { border-color: var(--border2); color: var(--text); }
-
-  .status-pill.selected-green { background: rgba(16,185,129,0.15); border-color: var(--green); color: var(--green); }
-  .status-pill.selected-yellow { background: rgba(245,158,11,0.15); border-color: var(--yellow); color: var(--yellow); }
-  .status-pill.selected-red { background: rgba(239,68,68,0.15); border-color: var(--red); color: var(--red); }
-
-  /* ── METRIC DISPLAY ── */
-  .metric-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .metric-badge.green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
-  .metric-badge.yellow { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
-  .metric-badge.red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
-
-  /* ── DATE DISPLAY ── */
-  .date-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--deep);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin-bottom: 24px;
-  }
-
-  .date-bar .date-label {
-    font-family: 'Bebas Neue', cursive;
-    font-size: 22px;
-    letter-spacing: 2px;
-    color: var(--text);
-  }
-
-  .date-bar .day-type-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    background: rgba(225,29,72,0.15);
-    color: var(--accent);
-    border: 1px solid rgba(225,29,72,0.3);
-    letter-spacing: 1px;
-  }
-
-  /* ── CHECKLIST ── */
-  .checklist { display: flex; flex-direction: column; gap: 8px; }
-
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    background: var(--deep);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-  }
-
-  .check-item:hover { border-color: var(--border2); }
-
-  .check-item.checked {
-    background: rgba(16,185,129,0.08);
-    border-color: rgba(16,185,129,0.3);
-  }
-
-  .check-box {
-    width: 20px;
-    height: 20px;
-    border-radius: 5px;
-    border: 2px solid var(--border2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.15s;
-    font-size: 12px;
-  }
-
-  .check-item.checked .check-box {
-    background: var(--green);
-    border-color: var(--green);
-    color: white;
-  }
-
-  .check-text {
-    font-size: 13px;
-    color: var(--muted);
-    transition: color 0.15s;
-  }
-
-  .check-item.checked .check-text { color: var(--text); }
-
-  /* ── SUBMIT BUTTON ── */
-  .btn-submit {
-    width: 100%;
-    padding: 16px;
-    background: var(--accent);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-family: 'Bebas Neue', cursive;
-    font-size: 20px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 8px;
-  }
-
-  .btn-submit:hover {
-    background: #be123c;
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(225,29,72,0.3);
-  }
-
-  .btn-submit:active { transform: translateY(0); }
-
-  /* ── HISTORY ── */
-  .history-entry {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: border-color 0.15s;
-  }
-
-  .history-entry:hover { border-color: var(--border2); }
-
-  .history-entry-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .history-date {
-    font-family: 'Bebas Neue', cursive;
-    font-size: 18px;
-    letter-spacing: 2px;
-    color: var(--text);
-  }
-
-  .history-metrics {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-
-  /* ── WEEKLY SUMMARY ── */
-  .summary-stat {
-    background: var(--deep);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    text-align: center;
-  }
-
-  .summary-stat .val {
-    font-family: 'Bebas Neue', cursive;
-    font-size: 32px;
-    letter-spacing: 1px;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-
-  .summary-stat .lbl {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--green);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 1000;
-    white-space: nowrap;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  }
-
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* ── EMPTY STATE ── */
-  .empty-state {
-    text-align: center;
-    padding: 48px 24px;
-    color: var(--muted);
-  }
-
-  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; line-height: 1.6; }
-
-  /* ── DETAIL MODAL ── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 100;
-    padding: 20px;
-    overflow-y: auto;
-  }
-
-  .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
-
-  .modal {
-    background: var(--card);
-    border: 1px solid var(--border2);
-    border-radius: 16px;
-    padding: 24px;
-    width: 100%;
-    max-width: 640px;
-    margin: auto;
-    animation: fadeUp 0.25s ease;
-  }
-
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-
-  .modal-close {
-    background: var(--deep);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-  }
-  .modal-close:hover { color: var(--text); border-color: var(--border2); }
-
-  .modal-section { margin-bottom: 16px; }
-  .modal-section-title {
-    font-size: 10px;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 8px;
-  }
-
-  .modal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .modal-metric {
-    background: var(--deep);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-  }
-  .modal-metric .mv {
-    font-family: 'Bebas Neue', cursive;
-    font-size: 24px;
-    color: var(--gold);
-    line-height: 1;
-  }
-  .modal-metric .ml {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-top: 2px;
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-  /* ── PROTOCOL REFERENCE ── */
-  .protocol-day {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin-bottom: 12px;
-    overflow: hidden;
-  }
-
-  .protocol-day-header {
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    background: var(--deep);
-    transition: background 0.15s;
-  }
-
-  .protocol-day-header:hover { background: var(--border); }
-
-  .protocol-day-title {
-    font-family: 'Bebas Neue', cursive;
-    font-size: 18px;
-    letter-spacing: 2px;
-  }
-
-  .protocol-day-body {
-    display: none;
-    padding: 16px;
-  }
-
-  .protocol-day-body.open { display: block; }
-
-  .protocol-item {
-    display: flex;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-  .protocol-item:last-child { border-bottom: none; }
-  .protocol-item .time {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--gold);
-    min-width: 64px;
-    padding-top: 1px;
-  }
+:root {
+  --black:   #080A0F;
+  --deep:    #0D1117;
+  --card:    #111827;
+  --border:  #1F2937;
+  --border2: #374151;
+  --text:    #E5E7EB;
+  --muted:   #6B7280;
+  --gold:    #F59E0B;
+  --red:     #EF4444;
+  --green:   #10B981;
+  --yellow:  #F59E0B;
+  --accent:  #E11D48;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(225,29,72,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 90% 90%, rgba(245,158,11,0.04) 0%, transparent 50%);
+}
+.container { max-width:680px; margin:0 auto; padding:0 16px 100px; position:relative; z-index:1; }
+
+/* HEADER */
+.header { padding:26px 0 18px; text-align:center; border-bottom:1px solid var(--border); margin-bottom:22px; }
+.header-badge { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; margin-bottom:6px; }
+.header h1 { font-family:'Bebas Neue',cursive; font-size:clamp(38px,10vw,58px); letter-spacing:4px; line-height:1; margin-bottom:4px; }
+.header h1 span { color:var(--gold); }
+.header-sub { font-size:12px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+
+/* TABS */
+.tabs { display:flex; gap:4px; background:var(--deep); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:22px; }
+.tab { flex:1; padding:13px 8px; border:none; background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; border-radius:8px; transition:all 0.2s; white-space:nowrap; text-align:center; }
+.tab.active { background:var(--accent); color:white; }
+.tab:hover:not(.active) { background:var(--border); color:var(--text); }
+
+/* PANELS */
+.panel { display:none; }
+.panel.active { display:block; animation:fadeUp 0.25s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* SECTION LABEL */
+.section-label {
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--gold); margin:20px 0 10px;
+  display:flex; align-items:center; gap:10px;
+}
+.section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* CARD */
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:12px; }
+
+/* GRID */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+
+/* FIELD */
+.field { display:flex; flex-direction:column; gap:5px; }
+.field label { font-size:11px; font-weight:500; color:var(--muted); letter-spacing:0.5px; text-transform:uppercase; }
+.field input, .field select, .field textarea {
+  background:var(--deep); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'DM Sans',sans-serif; font-size:15px;
+  padding:11px 14px; width:100%; outline:none; -webkit-appearance:none;
+  transition:border-color 0.2s, box-shadow 0.2s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color:var(--gold); box-shadow:0 0 0 3px rgba(245,158,11,0.1);
+}
+.field textarea { resize:vertical; min-height:90px; line-height:1.6; }
+.field select option { background:var(--deep); }
+.field input[type="number"] { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:600; text-align:center; }
+
+/* SLIDER */
+.slider-wrap { display:flex; align-items:center; gap:12px; }
+.slider-wrap input[type="range"] {
+  flex:1; -webkit-appearance:none; height:4px; background:var(--border2);
+  border-radius:2px; border:none; padding:0; box-shadow:none;
+}
+.slider-wrap input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+  background:var(--gold); cursor:pointer; border:2px solid var(--black);
+}
+.slider-val { font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:600; color:var(--gold); min-width:28px; text-align:center; }
+
+/* DATE BAR */
+.date-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--deep); border:1px solid var(--border); border-radius:10px;
+  padding:12px 16px; margin-bottom:20px;
+}
+.date-bar .date-label { font-family:'Bebas Neue',cursive; font-size:22px; letter-spacing:2px; }
+
+/* SUBMIT BTN */
+.btn-submit {
+  width:100%; padding:16px; background:var(--accent); border:none; border-radius:12px;
+  color:white; font-family:'Bebas Neue',cursive; font-size:20px; letter-spacing:3px;
+  cursor:pointer; transition:all 0.2s; margin-top:8px;
+}
+.btn-submit:hover { background:#be123c; transform:translateY(-1px); box-shadow:0 8px 24px rgba(225,29,72,0.3); }
+.btn-submit:active { transform:translateY(0); }
+.btn-submit:disabled { opacity:0.5; cursor:default; transform:none; box-shadow:none; }
+
+/* ── HABIT CHECKLIST ── */
+.habit-cat {
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--muted); margin:20px 0 10px; padding-left:2px;
+  display:flex; align-items:center; gap:10px;
+}
+.habit-cat::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.check-item {
+  display:flex; align-items:flex-start; gap:12px; padding:12px 14px;
+  background:var(--deep); border:1px solid var(--border); border-radius:10px;
+  cursor:pointer; transition:all 0.15s; user-select:none; margin-bottom:8px;
+}
+.check-item:hover { border-color:var(--border2); }
+.check-item.checked { background:rgba(16,185,129,0.07); border-color:rgba(16,185,129,0.3); }
+
+.check-box {
+  width:22px; height:22px; border-radius:5px; border:2px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.15s; font-size:13px; color:transparent;
+  margin-top:1px;
+}
+.check-item.checked .check-box { background:var(--green); border-color:var(--green); color:white; }
+
+.check-content { flex:1; }
+.check-title { font-size:14px; font-weight:500; color:var(--muted); transition:color 0.15s; line-height:1.3; margin-bottom:3px; }
+.check-desc { font-size:12px; color:var(--border2); line-height:1.5; transition:color 0.15s; }
+.check-item.checked .check-title { color:var(--text); }
+.check-item.checked .check-desc { color:var(--muted); }
+
+/* PROGRESS */
+.progress-wrap { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:4px; }
+.progress-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.progress-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1.5px; }
+.progress-pct { font-family:'Bebas Neue',cursive; font-size:32px; color:var(--gold); line-height:1; }
+.progress-track { background:var(--deep); border-radius:6px; height:8px; overflow:hidden; }
+.progress-bar { height:100%; width:0%; background:var(--green); border-radius:6px; transition:width 0.4s, background 0.4s; }
+.progress-count { font-size:12px; color:var(--muted); margin-top:8px; }
+
+/* EMPTY STATE */
+.empty-state { text-align:center; padding:48px 24px; color:var(--muted); }
+.empty-icon { font-size:40px; margin-bottom:12px; }
+.empty-state p { font-size:14px; line-height:1.7; }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--green); color:white; padding:12px 24px;
+  border-radius:10px; font-weight:600; font-size:14px; letter-spacing:0.5px;
+  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:1000; white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
 </style>
 </head>
 <body>
-
 <div class="container">
 
   <!-- HEADER -->
   <div class="header">
     <div class="header-badge">Performance Journal</div>
     <h1>RD<span>33</span></h1>
-    <div class="header-sub">Serie B Nazionale &nbsp;·&nbsp; Italy</div>
+    <div class="header-sub">Serie B Nazionale &nbsp;&middot;&nbsp; Italy</div>
   </div>
 
-  <!-- TABS -->
+  <!-- TABS — just two -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('log')">📋 Log</button>
-    <button class="tab" onclick="switchTab('checklist')">☑️ Today</button>
-    <button class="tab" onclick="switchTab('protocol')">⚡ Protocol</button>
-    <button class="tab" onclick="switchTab('history')">📊 History</button>
-    <button class="tab" onclick="switchTab('weekly')">🗓 Weekly</button>
+    <button class="tab active" onclick="switchTab('log',this)">&#x1F4CB;&nbsp; Daily Log</button>
+    <button class="tab" onclick="switchTab('habits',this)">&#x2705;&nbsp; Habits</button>
   </div>
 
-  <!-- ═══════════ PANEL: DAILY LOG ═══════════ -->
+
+  <!-- ═══════════════════════════════════════════
+       TAB 1 — DAILY LOG
+  ═══════════════════════════════════════════ -->
   <div class="panel active" id="panel-log">
 
     <div class="date-bar">
-      <div class="date-label" id="today-label">—</div>
-      <select id="day-type-select" style="background:transparent;border:none;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;outline:none;">
+      <div class="date-label" id="log-date">—</div>
+      <select id="log-day-type"
+        style="background:transparent;border:none;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;outline:none;">
         <option value="">DAY TYPE</option>
-        <option>MON — OFF</option>
-        <option>TUE — HEAVY</option>
-        <option>WED — LATE</option>
-        <option>THU — HEAVY</option>
-        <option>FRI — LIGHT</option>
-        <option>FRI — MOD</option>
-        <option>SAT — GAME</option>
-        <option>SAT — LIGHT</option>
-        <option>SUN — GAME</option>
-        <option>SUN — OFF</option>
+        <option>MON &#8212; OFF</option>
+        <option>TUE &#8212; HEAVY</option>
+        <option>WED &#8212; LATE</option>
+        <option>THU &#8212; HEAVY</option>
+        <option>FRI &#8212; LIGHT</option>
+        <option>FRI &#8212; MOD</option>
+        <option>SAT &#8212; GAME</option>
+        <option>SAT &#8212; LIGHT</option>
+        <option>SUN &#8212; GAME</option>
+        <option>SUN &#8212; OFF</option>
       </select>
     </div>
 
     <!-- BIOMETRICS -->
     <div class="section-label">Biometrics</div>
     <div class="card">
-      <div class="grid-3">
-        <div class="field">
-          <label>HRV</label>
-          <input type="number" id="hrv" placeholder="78" min="0" max="200">
-        </div>
-        <div class="field">
-          <label>Recovery %</label>
-          <input type="number" id="recovery" placeholder="89" min="0" max="100">
-        </div>
-        <div class="field">
-          <label>Strain</label>
-          <input type="number" id="strain" placeholder="16.6" step="0.1" min="0" max="21">
-        </div>
-      </div>
-    </div>
-
-    <!-- SLEEP -->
-    <div class="section-label">Sleep</div>
-    <div class="card">
       <div class="grid-3" style="margin-bottom:12px;">
-        <div class="field">
-          <label>Score %</label>
-          <input type="number" id="sleep-score" placeholder="89" min="0" max="100">
-        </div>
-        <div class="field">
-          <label>Hours</label>
-          <input type="number" id="sleep-hrs" placeholder="8.3" step="0.1" min="0" max="14">
-        </div>
-        <div class="field">
-          <label>RHR</label>
-          <input type="number" id="rhr" placeholder="52" min="30" max="120">
-        </div>
+        <div class="field"><label>HRV</label><input type="number" id="hrv" placeholder="78" min="0" max="200"></div>
+        <div class="field"><label>Recovery %</label><input type="number" id="recovery" placeholder="89" min="0" max="100"></div>
+        <div class="field"><label>Strain</label><input type="number" id="strain" placeholder="16.6" step="0.1" min="0" max="21"></div>
+      </div>
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div class="field"><label>Sleep %</label><input type="number" id="sleep-score" placeholder="89" min="0" max="100"></div>
+        <div class="field"><label>Sleep Hrs</label><input type="number" id="sleep-hrs" placeholder="8.3" step="0.1" min="0" max="14"></div>
+        <div class="field"><label>RHR</label><input type="number" id="rhr" placeholder="52" min="30" max="120"></div>
       </div>
       <div class="grid-2">
-        <div class="field">
-          <label>Resp Rate</label>
-          <input type="number" id="resp" placeholder="15.4" step="0.1" min="8" max="25">
-        </div>
-        <div class="field">
-          <label>Deep Sleep</label>
+        <div class="field"><label>Resp Rate</label><input type="number" id="resp" placeholder="15.4" step="0.1" min="8" max="25"></div>
+        <div class="field"><label>Deep Sleep</label>
           <select id="deep-sleep">
             <option value="">Select</option>
-            <option>Normal</option>
-            <option>Slightly Low</option>
-            <option>Low</option>
-            <option>Very Low</option>
-            <option>High</option>
+            <option>Normal</option><option>Slightly Low</option>
+            <option>Low</option><option>Very Low</option><option>High</option>
           </select>
         </div>
       </div>
@@ -748,1159 +252,755 @@
     <!-- PHYSICAL FEEL -->
     <div class="section-label">Physical Feel</div>
     <div class="card">
-      <div style="margin-bottom:14px;">
-        <div class="field" style="margin-bottom:4px;"><label>Energy Level</label></div>
+      <div style="margin-bottom:16px;">
+        <div class="field" style="margin-bottom:6px;"><label>Energy Level</label></div>
         <div class="slider-wrap">
           <input type="range" id="energy" min="1" max="10" value="7" oninput="updateSlider('energy','energy-val')">
           <div class="slider-val" id="energy-val">7</div>
         </div>
       </div>
-      <div style="margin-bottom:14px;">
-        <div class="field" style="margin-bottom:4px;"><label>Soreness Level</label></div>
+      <div style="margin-bottom:16px;">
+        <div class="field" style="margin-bottom:6px;"><label>Soreness Level</label></div>
         <div class="slider-wrap">
-          <input type="range" id="soreness" min="1" max="10" value="4" oninput="updateSlider('soreness','soreness-val')">
-          <div class="slider-val" id="soreness-val">4</div>
+          <input type="range" id="soreness" min="1" max="10" value="3" oninput="updateSlider('soreness','soreness-val')">
+          <div class="slider-val" id="soreness-val">3</div>
         </div>
       </div>
       <div class="field">
         <label>Joint / Pain Notes</label>
-        <input type="text" id="joint-notes" placeholder="e.g. Tight left ankle, no pain">
+        <input type="text" id="joint-notes" placeholder="e.g. Tight left ankle, right knee fine">
       </div>
     </div>
 
     <!-- PERFORMANCE -->
     <div class="section-label">Performance</div>
     <div class="card">
-      <div style="margin-bottom:14px;">
-        <div class="field" style="margin-bottom:4px;"><label>Practice / Game Rating</label></div>
+      <div style="margin-bottom:16px;">
+        <div class="field" style="margin-bottom:6px;"><label>Practice / Game Rating</label></div>
         <div class="slider-wrap">
           <input type="range" id="perf" min="1" max="10" value="7" oninput="updateSlider('perf','perf-val')">
           <div class="slider-val" id="perf-val">7</div>
         </div>
       </div>
-      <div class="grid-2">
-        <div class="field">
-          <label>Mental Sharpness</label>
-          <select id="mental-sharp">
-            <option value="">Select</option>
-            <option>Elite</option>
-            <option>Sharp</option>
-            <option>Moderate</option>
-            <option>Foggy</option>
-            <option>Off</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Competitive Feel</label>
-          <select id="comp-feel">
-            <option value="">Select</option>
-            <option>In the zone</option>
-            <option>Present</option>
-            <option>Tight</option>
-            <option>Reactive</option>
-            <option>Disconnected</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- MINDSET & SPIRIT -->
-    <div class="section-label">Mindset & Spirit</div>
-    <div class="card">
-      <div style="margin-bottom:14px;">
-        <div class="field" style="margin-bottom:4px;"><label>Overall Internal State</label></div>
+      <div style="margin-bottom:16px;">
+        <div class="field" style="margin-bottom:6px;"><label>Mood / Internal State</label></div>
         <div class="slider-wrap">
           <input type="range" id="mood" min="1" max="10" value="7" oninput="updateSlider('mood','mood-val')">
           <div class="slider-val" id="mood-val">7</div>
         </div>
       </div>
-      <div class="card-title" style="font-size:12px;margin-bottom:10px;color:var(--muted);">Protocol Completion</div>
-      <div class="checklist" id="protocol-checklist">
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Heart Anchor (60-sec morning)</div>
+      <div class="grid-2">
+        <div class="field"><label>Mental Sharpness</label>
+          <select id="mental-sharp">
+            <option value="">Select</option>
+            <option>Elite</option><option>Sharp</option>
+            <option>Moderate</option><option>Foggy</option><option>Off</option>
+          </select>
         </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Bible study</div>
+        <div class="field"><label>Competitive Feel</label>
+          <select id="comp-feel">
+            <option value="">Select</option>
+            <option>In the zone</option><option>Present</option>
+            <option>Tight</option><option>Reactive</option><option>Disconnected</option>
+          </select>
         </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Journaling — gratitude + presuppositions</div>
+      </div>
+    </div>
+
+    <!-- FOOD LOG -->
+    <div class="section-label">Food Log</div>
+    <div class="card">
+      <div class="field" style="margin-bottom:12px;">
+        <label>Breakfast</label>
+        <textarea id="food-breakfast" placeholder="What did you eat? Approximate portions..."></textarea>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Lunch</label>
+        <textarea id="food-lunch" placeholder="What did you eat?"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Dinner</label>
+        <textarea id="food-dinner" placeholder="What did you eat?"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label>Snacks / Pre &amp; Post Workout</label>
+        <textarea id="food-snacks" placeholder="Shakes, bridge snacks, pre-game fuel, bedtime protein, etc."></textarea>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label>Est. Protein (g)</label>
+          <input type="number" id="protein-est" placeholder="190" min="0" max="500">
         </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Dispenza meditation</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Pre-practice Zoe declaration</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Evening review (3 in / 3 out)</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Sacred silence — 5 min</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Magnesium glycinate taken</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Post-lift bridge shake</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Post-practice nutrition within 30 min</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Protein target 190g+ hit</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-          <div class="check-box">✓</div>
-          <div class="check-text">Hard bedtime hit</div>
+        <div class="field"><label>Hydration (L)</label>
+          <input type="number" id="hydration" placeholder="3.5" step="0.5" min="0" max="10">
         </div>
       </div>
     </div>
 
     <!-- NOTES -->
-    <div class="section-label">Notes & Flags</div>
+    <div class="section-label">Notes</div>
     <div class="card">
       <div class="field">
-        <textarea id="notes" placeholder="Anything worth logging — travel, illness, life events, unusual circumstances, observations about your game, spiritual insights..."></textarea>
+        <label>How did you feel? Practice &amp; game observations. Anything worth logging.</label>
+        <textarea id="notes" style="min-height:140px;"
+          placeholder="Walk through the day. How was practice or the game? How did you compete mentally? What was your body doing? Spiritual check-in. Anything unusual..."></textarea>
       </div>
     </div>
 
-    <button class="btn-submit" id="save-btn" onclick="saveEntry()">SAVE ENTRY</button>
+    <button class="btn-submit" id="log-save-btn" onclick="saveLog()">SAVE ENTRY &#8594; SHEETS</button>
   </div>
 
 
+  <!-- ═══════════════════════════════════════════
+       TAB 2 — HABITS / PROTOCOL TRACKER
+  ═══════════════════════════════════════════ -->
+  <div class="panel" id="panel-habits">
 
-  <!-- ═══════════ PANEL: DAILY CHECKLIST ═══════════ -->
-  <div class="panel" id="panel-checklist">
-
-    <div class="date-bar" style="margin-bottom:16px;">
-      <div class="date-label" id="checklist-date-label">—</div>
-      <select id="checklist-day-type" onchange="renderChecklist()"
+    <div class="date-bar">
+      <div class="date-label" id="habit-date">—</div>
+      <select id="habit-day-type" onchange="loadHabits()"
         style="background:transparent;border:none;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;outline:none;">
-        <option value="">DAY TYPE</option>
-        <option>MON — OFF</option>
-        <option>TUE — HEAVY</option>
-        <option>WED — LATE</option>
-        <option>THU — HEAVY</option>
-        <option>FRI — LIGHT</option>
-        <option>FRI — MOD</option>
-        <option>SAT — GAME</option>
-        <option>SAT — LIGHT</option>
-        <option>SUN — GAME</option>
-        <option>SUN — OFF</option>
+        <option value="">SELECT DAY TYPE</option>
+        <option>MON &#8212; OFF</option>
+        <option>TUE &#8212; HEAVY</option>
+        <option>WED &#8212; LATE</option>
+        <option>THU &#8212; HEAVY</option>
+        <option>FRI &#8212; LIGHT</option>
+        <option>FRI &#8212; MOD</option>
+        <option>SAT &#8212; GAME</option>
+        <option>SAT &#8212; LIGHT</option>
+        <option>SUN &#8212; GAME</option>
+        <option>SUN &#8212; OFF</option>
       </select>
     </div>
 
-    <div id="checklist-body">
+    <!-- EMPTY STATE -->
+    <div id="habits-empty">
       <div class="empty-state">
-        <div class="empty-icon">☑️</div>
-        <p>Select your day type above<br>to load today's protocol checklist.</p>
+        <div class="empty-icon">&#x2705;</div>
+        <p>Select your day type above.<br>Your full protocol loads with descriptions.<br>Check each task off as you complete it.</p>
       </div>
     </div>
 
-    <div id="checklist-save-wrap" style="display:none;margin-top:8px;">
-      <div id="checklist-progress-bar-wrap" style="background:var(--deep);border-radius:6px;height:6px;margin-bottom:12px;overflow:hidden;">
-        <div id="checklist-progress-bar" style="height:100%;width:0%;background:var(--green);border-radius:6px;transition:width 0.4s;"></div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;">COMPLIANCE</span>
-        <span id="checklist-pct" style="font-family:'Bebas Neue',cursive;font-size:22px;color:var(--gold);">0%</span>
-      </div>
-      <button class="btn-submit" id="checklist-save-btn" onclick="saveChecklist()">SAVE CHECKLIST TO SHEET</button>
-    </div>
-  </div>
+    <!-- LOADED CONTENT -->
+    <div id="habits-content" style="display:none;">
 
-  <!-- ═══════════ PANEL: PROTOCOL ═══════════ -->
-  <div class="panel" id="panel-protocol">
-
-    <div class="section-label">Daily Protocols</div>
-
-    <!-- MON -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--muted);">MON — FULL RECOVERY</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WAKE</span>500ml water + electrolytes immediately. No alarm if possible.</div>
-        <div class="protocol-item"><span class="time">9:15 AM</span>Sunlight within 30 min. Heart Anchor — 60 sec (5.5 breath). Bible study + journaling.</div>
-        <div class="protocol-item"><span class="time">ACTIVE</span>20-min walk — nasal breathing only. 10-15 min mobility: hips, ankles, thoracic spine.</div>
-        <div class="protocol-item"><span class="time">NUTRITION</span>High protein, anti-inflammatory. Omega-3 rich foods, berries, olive oil. 3–4L hydration target.</div>
-        <div class="protocol-item"><span class="time">CONTRAST</span>Contrast shower: 3-4 rounds (90s hot / 30s cold). End on cold.</div>
-        <div class="protocol-item"><span class="time">MINDSET</span>Dispenza meditation. HeartMath / 5.5 breathing. Evening review — 3 in / 3 out. Sacred silence 5 min.</div>
-        <div class="protocol-item"><span class="time">11:00 PM</span>Hard bedtime. Magnesium glycinate. Prayer. Monday sleep is the foundation of the entire week.</div>
-      </div>
-    </div>
-
-    <!-- TUE -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--red);">TUE — HEAVIEST PRACTICE</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">9:15 AM</span>Breakfast: shake + oats + banana + berries. Paraxanthine 90 min after wake.</div>
-        <div class="protocol-item"><span class="time">11:30 AM</span>Lift. Electrolytes throughout.</div>
-        <div class="protocol-item"><span class="time">11:45 AM</span>Post-lift bridge: 1 scoop whey + fruit. NON-NEGOTIABLE — closes anabolic window.</div>
-        <div class="protocol-item"><span class="time">12:00 PM</span>Lunch: pasta first + lean protein second. Moderate portion — fueling not feasting.</div>
-        <div class="protocol-item"><span class="time">PRE</span>Pre-practice Zoe declaration. Electrolytes during practice.</div>
-        <div class="protocol-item"><span class="time">POST</span>Within 30 min: 30–40g protein + 60–80g fast carbs. Electrolytes immediately.</div>
-        <div class="protocol-item"><span class="time">EVENING</span>Full dinner. Tart cherry juice. Magnesium glycinate. Dispenza / HeartMath before sleep.</div>
-        <div class="protocol-item"><span class="time">11:00 PM</span>Hard bedtime — Tuesday night sleep is critical for Wednesday readiness.</div>
-      </div>
-    </div>
-
-    <!-- WED -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--red);">WED — LATE PRACTICE 🔴</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">9:15 AM</span>Breakfast. Check HRV — this is Tuesday's recovery report card.</div>
-        <div class="protocol-item"><span class="time">11:30 AM</span>Lift. Post-lift bridge immediately after.</div>
-        <div class="protocol-item"><span class="time">12:00 PM</span>Lunch as normal.</div>
-        <div class="protocol-item"><span class="time">2:00 PM</span>⚠️ PARAXANTHINE HARD CUTOFF — nothing after this time on Wednesdays.</div>
-        <div class="protocol-item"><span class="time">5:00–6 PM</span>PRE-PRACTICE MEAL — this IS your dinner. Full meal: protein + complex carbs. Do not skip this.</div>
-        <div class="protocol-item"><span class="time">7:30 PM</span>Practice. Electrolytes throughout. Pre-practice Zoe declaration in locker room.</div>
-        <div class="protocol-item"><span class="time">9:30 PM</span>Practice ends. Begin parasympathetic shift NOW — nasal breathing, no heated conversations.</div>
-        <div class="protocol-item"><span class="time">10:45 PM</span>Home. Lights down immediately. Recovery snack only if hungry: yogurt + honey or rice cakes + nut butter.</div>
-        <div class="protocol-item"><span class="time">11:00 PM</span>Magnesium glycinate. Tart cherry juice. HeartMath / 5.5 breathing — 5 min minimum. Prayer.</div>
-        <div class="protocol-item"><span class="time">12:15 AM</span>HARD BEDTIME — non-negotiable. Every minute past this costs deep sleep architecture.</div>
-      </div>
-    </div>
-
-    <!-- THU -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--red);">THU — HEAVY (CONSERVATION DAY)</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WAKE</span>Eat within 45 min — glycogen depleted from Tue/Wed. Carb emphasis at breakfast today.</div>
-        <div class="protocol-item"><span class="time">NOTE</span>Thursday strain is high NOT because practice is intense — your body is fatigued and working harder. This is a conservation day disguised as practice. Get in, be sharp, get out.</div>
-        <div class="protocol-item"><span class="time">11:30 AM</span>Lift. Post-lift bridge immediately after.</div>
-        <div class="protocol-item"><span class="time">PRE</span>10-min visualization / prayer before practice. CNS is fatigued — mental prep matters more today than any other day.</div>
-        <div class="protocol-item"><span class="time">POST</span>30-min nutrition window — most important recovery window of the entire week. 30–40g protein + 60–80g fast carbs immediately.</div>
-        <div class="protocol-item"><span class="time">HOME</span>Contrast shower: 3-4 rounds (90s hot / 30s cold). End cold.</div>
-        <div class="protocol-item"><span class="time">AFTER</span>Magnesium spray on legs + back. Legs up wall 15–20 min + Dispenza meditation simultaneously.</div>
-        <div class="protocol-item"><span class="time">DINNER</span>Full meal within 2 hrs post-practice. Tart cherry juice. Magnesium glycinate.</div>
-        <div class="protocol-item"><span class="time">11:00 PM</span>HARD BEDTIME — Thursday night sleep is the most performance-predictive sleep of the entire week. Protect it.</div>
-      </div>
-    </div>
-
-    <!-- FRI LIGHT -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--blue);">FRI — LIGHT (SAT GAME WEEK)</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WAKE</span>Check HRV — this is Thursday's recovery report card. Should be trending up.</div>
-        <div class="protocol-item"><span class="time">9:15 AM</span>Breakfast. Post-lift bridge. Carb loading begins today.</div>
-        <div class="protocol-item"><span class="time">PRACTICE</span>Light only — CNS priming, not loading. No voluntary extra work today.</div>
-        <div class="protocol-item"><span class="time">PRE</span>Pre-practice Zoe declaration. Mental preparation begins: visualization, film, competition mindset.</div>
-        <div class="protocol-item"><span class="time">NUTRITION</span>Familiar foods only. Carb emphasis. Chef dinner: pasta + protein, simple prep.</div>
-        <div class="protocol-item"><span class="time">MINDSET</span>Full Zoe Protocol evening. Dispenza + HeartMath. Visualize Saturday game specifically.</div>
-        <div class="protocol-item"><span class="time">10:30–11 PM</span>Hard bedtime. Magnesium glycinate. Tart cherry. Friday sleep feeds Saturday performance directly.</div>
-      </div>
-    </div>
-
-    <!-- FRI MOD -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--blue);">FRI — MODERATE (SUN GAME WEEK)</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WAKE</span>Check HRV. Breakfast. Post-lift bridge.</div>
-        <div class="protocol-item"><span class="time">PRACTICE</span>Moderate load is appropriate — Saturday light practice is your true activation day.</div>
-        <div class="protocol-item"><span class="time">POST</span>Post-practice nutrition within 30 min. Full dinner.</div>
-        <div class="protocol-item"><span class="time">NUTRITION</span>Protein + carb balance today. Quality chef dinner.</div>
-        <div class="protocol-item"><span class="time">MINDSET</span>Dispenza / HeartMath. Evening review. Sacred silence.</div>
-        <div class="protocol-item"><span class="time">11:00 PM</span>Hard bedtime. Magnesium glycinate.</div>
-      </div>
-    </div>
-
-    <div class="section-label" style="margin-top:20px;">Weekend Protocols</div>
-
-    <!-- SAT GAME -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--gold);">🏀 SAT — GAME DAY (TIP 6:00 PM)</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WAKE</span>Natural wake. 500ml water + electrolytes. Sunlight. HRV check and log.</div>
-        <div class="protocol-item"><span class="time">BREAKFAST</span>Shake + oats + banana. No kefir today. Familiar food only. Nothing new on game day.</div>
-        <div class="protocol-item"><span class="time">9:00 AM</span>Optional 15–20 min walk. Nasal breathing only. Body activation, not strain.</div>
-        <div class="protocol-item"><span class="time">10:00 AM</span>Dispenza + visualization + prayer. Walk through the game. Feel it — not just see it.</div>
-        <div class="protocol-item"><span class="time">11:00 AM</span>Pre-travel fuel meal: 100–120g carbs / 35–40g protein / low fat + low fiber.</div>
-        <div class="protocol-item"><span class="time">12:15 PM</span>Bus. Electrolytes. Snacks packed (banana, dates, rice cakes). Headphones. Protect mental state.</div>
-        <div class="protocol-item"><span class="time">3:00 PM</span>Arrive venue. Begin settling. No rushing.</div>
-        <div class="protocol-item"><span class="time">3:30 PM</span>⚡ PARAXANTHINE — peaks at tip-off at 6:00 PM.</div>
-        <div class="protocol-item"><span class="time">4:00 PM</span>Extended warm up begins.</div>
-        <div class="protocol-item"><span class="time">4:30 PM</span>Last carb hit: banana / dates / 20–30g fast carbs.</div>
-        <div class="protocol-item"><span class="time">5:30 PM</span>Locker room: hand on chest → 3 breaths → Zoe declaration → release the outcome → step on the court from your heart.</div>
-        <div class="protocol-item"><span class="time">6:00 PM</span>🏀 TIP OFF</div>
-        <div class="protocol-item"><span class="time">POST</span>Protein + carbs within 30 min of final buzzer. 500ml water + electrolytes on bus. Begin parasympathetic shift — nasal breathing, calm.</div>
-        <div class="protocol-item"><span class="time">HOME</span>Full recovery meal. Magnesium glycinate + tart cherry. HeartMath 10 min. Prayer — release the game. Bed by 12:00–12:30 AM.</div>
-      </div>
-    </div>
-
-    <!-- SAT LIGHT -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--blue);">SAT — LIGHT PRACTICE (SUN GAME WEEK)</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WAKE</span>Natural wake preferred. 500ml water + electrolytes. Sunlight. HRV check.</div>
-        <div class="protocol-item"><span class="time">7:15 AM</span>Breakfast — begin carb loading. Shake + oats + banana + berries.</div>
-        <div class="protocol-item"><span class="time">11:00 AM</span>Pre-practice fuel meal: protein + complex carbs.</div>
-        <div class="protocol-item"><span class="time">2:30 PM</span>Light practice — activation only. Pre-practice Zoe declaration.</div>
-        <div class="protocol-item"><span class="time">4:00–4:30 PM</span>Practice ends. Post-practice bridge snack: 1 scoop whey + banana.</div>
-        <div class="protocol-item"><span class="time">6:00–7:00 PM</span>CHEF DINNER — PRIMARY pre-competition carb load. Pasta + lean protein. Simple familiar prep. Nothing experimental.</div>
-        <div class="protocol-item"><span class="time">8:00 PM</span>Hard wind down begins. Lights down. No stimulating content.</div>
-        <div class="protocol-item"><span class="time">9:30 PM</span>HeartMath + Zoe prayer. Visualize Sunday game — specific possessions, your role, moments you want to create.</div>
-        <div class="protocol-item"><span class="time">10:30 PM</span>HARD BEDTIME — most important sleep of the week. Protects Sunday performance ceiling.</div>
-      </div>
-    </div>
-
-    <!-- SUN GAME -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--gold);">🏀 SUN — GAME DAY (TIP 6:00 PM)</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">6:00–7 AM</span>Natural wake. 500ml water + electrolytes. Sunlight. HRV check and log.</div>
-        <div class="protocol-item"><span class="time">BREAKFAST</span>Shake + oats + banana. No kefir. Familiar food only. Nothing new today.</div>
-        <div class="protocol-item"><span class="time">9:00 AM</span>Optional 15–20 min walk. Nasal breathing. Body activation.</div>
-        <div class="protocol-item"><span class="time">10:00 AM</span>Dispenza + visualization + prayer. Walk through the game. Feel it fully.</div>
-        <div class="protocol-item"><span class="time">11:00 AM</span>Pre-travel fuel meal: 100–120g carbs / 35–40g protein / low fat + low fiber.</div>
-        <div class="protocol-item"><span class="time">12:15 PM</span>Bus. Electrolytes. Snacks (banana, dates). Headphones. Decompress first 30 min, activate final 30 min.</div>
-        <div class="protocol-item"><span class="time">3:00 PM</span>Arrive venue. Settle.</div>
-        <div class="protocol-item"><span class="time">3:30 PM</span>⚡ PARAXANTHINE — peaks at tip-off.</div>
-        <div class="protocol-item"><span class="time">4:00 PM</span>Extended warm up begins.</div>
-        <div class="protocol-item"><span class="time">4:30 PM</span>Last carb hit: banana / dates / 20–30g fast carbs.</div>
-        <div class="protocol-item"><span class="time">5:30 PM</span>Locker room: hand on chest → 3 breaths → Zoe declaration → release the outcome.</div>
-        <div class="protocol-item"><span class="time">6:00 PM</span>🏀 TIP OFF</div>
-        <div class="protocol-item"><span class="time">POST</span>Protein + carbs within 30 min. Electrolytes on bus. Parasympathetic shift — let the game go.</div>
-        <div class="protocol-item"><span class="time">HOME</span>Full recovery meal. Magnesium + tart cherry. HeartMath 10 min. Prayer. Bed 12:00–12:30 AM. Monday is full rest — you've earned it.</div>
-      </div>
-    </div>
-
-    <!-- SUN OFF -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--muted);">SUN — OFF (SAT GAME WEEK)</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WAKE</span>Sleep until natural wake. No alarm. 500ml water on wake.</div>
-        <div class="protocol-item"><span class="time">AM</span>Sunlight. Heart Anchor — 60 sec. Bible study + journaling.</div>
-        <div class="protocol-item"><span class="time">ACTIVE</span>20-min walk — nasal breathing. Mobility: hips, ankles, thoracic spine. Contrast shower.</div>
-        <div class="protocol-item"><span class="time">REFLECT</span>Reflect on Saturday's game while it's fresh. Log your entry. What happened? What's the gift in it?</div>
-        <div class="protocol-item"><span class="time">NUTRITION</span>Anti-inflammatory focus. Omega-3 rich foods. Protein 190g+ target. 3–4L hydration.</div>
-        <div class="protocol-item"><span class="time">MINDSET</span>Dispenza meditation. Full Zoe weekly audit. Sacred silence. Evening review.</div>
-        <div class="protocol-item"><span class="time">11:00 PM</span>Hard bedtime. Magnesium glycinate. Tomorrow is Monday — the week resets.</div>
-      </div>
-    </div>
-
-    <div class="section-label" style="margin-top:24px;">Zoe Protocol — Execution Guide</div>
-
-    <!-- HEART ANCHOR -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--gold);">🫀 HEART ANCHOR — 60 Seconds</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WHAT</span>A 60-second somatic grounding practice that shifts you from head to body before anything else happens in your day. It is the bridge between sleeping and being present. Without this, everything else in the Zoe Protocol stays intellectual — known but not felt.</div>
-        <div class="protocol-item"><span class="time">WHY</span>Your nervous system doesn't know the difference between a real threat and a thought. The Heart Anchor trains it to return to baseline on command — building the same skill you need under pressure in the fourth quarter.</div>
-        <div class="protocol-item"><span class="time">STEP 1</span>Place your right hand on your chest. Feel the physical warmth and weight of your hand. Feel your heartbeat if you can. This is the anchor point — you are locating yourself in your body, not in your thoughts.</div>
-        <div class="protocol-item"><span class="time">STEP 2</span>Breathe in through your nose for 5.5 seconds. Breathe out through your nose for 5.5 seconds. This is the resonance frequency of the heart — it directly activates the parasympathetic nervous system and creates HRV coherence. Do not rush it.</div>
-        <div class="protocol-item"><span class="time">STEP 3</span>On each exhale, let your body drop. Jaw loose. Shoulders down. Belly soft. You are not performing relaxation — you are releasing the grip your mind has been holding overnight.</div>
-        <div class="protocol-item"><span class="time">STEP 4</span>Do this for 5–6 breath cycles. That's it. 60 seconds. Don't extend it. Don't make it complicated. Just arrive.</div>
-        <div class="protocol-item"><span class="time">SIGNAL</span>You'll know it's working when there is a subtle shift — a slight warmth in the chest, a sense of settling, a feeling of being in the room rather than in your head. That's coherence. That's what you're training.</div>
-        <div class="protocol-item"><span class="time">WHEN</span>Every morning before Bible study. Also use it: immediately before the pre-practice Zoe declaration, in the locker room before tip-off, and any moment during the day when anxiety or tension spikes.</div>
-      </div>
-    </div>
-
-    <!-- PRE-PRACTICE ZOE DECLARATION -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--gold);">⚡ PRE-PRACTICE ZOE DECLARATION</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WHAT</span>A 90-second intentional identity reset done in the locker room before every practice and every game. Its purpose is to sever the connection between your performance and your ego, and reconnect it to something larger. You are not competing to prove anything. You are competing to express something.</div>
-        <div class="protocol-item"><span class="time">WHY</span>Most performance anxiety comes from identity threat — the fear that a bad game means something about your worth. The declaration pre-loads the correct frame so the ego never fully takes over. Phil Jackson called it "selfless basketball." This is the mechanism behind it.</div>
-        <div class="protocol-item"><span class="time">STEP 1</span>Find 90 seconds alone or in stillness. Locker room, bathroom, corner of the gym. It does not need to be silent — it needs to be intentional. Place your hand on your chest.</div>
-        <div class="protocol-item"><span class="time">STEP 2</span>Take 3 slow breaths — 5.5 seconds in, 5.5 seconds out. Let the noise of the environment fall to the background. You are not escaping it — you are choosing your focal point.</div>
-        <div class="protocol-item"><span class="time">STEP 3</span>Speak the declaration — out loud if possible, internally if needed. Mean every word:<br><br><em style="color:var(--accent);line-height:1.8;">"I compete to raise the level of excellence in my life in order to raise it in others. Not for the trophy. Not for adoration. To discover something within me and fully experience this moment."</em></div>
-        <div class="protocol-item"><span class="time">STEP 4</span>Release the outcome. This is not a performance cue or a hype-up technique. After you say it, let go. You have set the frame. Now trust it. Walk onto the court or into practice as a son of God who plays basketball — not a basketball player trying to prove his worth.</div>
-        <div class="protocol-item"><span class="time">SIGNAL</span>The correct internal state after this practice is not fired up — it is settled and open. Calm readiness. Rootedness. If you feel anxious after it, do the Heart Anchor again. You haven't landed yet.</div>
-        <div class="protocol-item"><span class="time">GAME DAY</span>In the locker room at 5:30 PM: hand on chest → 3 breaths → declaration → release → walk out. That sequence is the full ritual. Do not skip any step.</div>
-      </div>
-    </div>
-
-    <!-- EVENING REVIEW -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--gold);">🌙 EVENING REVIEW — 3 Minutes</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WHAT</span>A structured 3-minute end-of-day audit done before sleep. Not journaling. Not reflection for its own sake. This is a precision tool: you are training your nervous system to recognize coherence and incoherence as distinct physical states — so you can choose one on demand.</div>
-        <div class="protocol-item"><span class="time">WHY</span>The brain consolidates memory and emotional tone during sleep. What you rehearse in the last 10 minutes before sleep is what gets encoded. Most athletes go to bed replaying mistakes, arguments, or anxious loops. The Evening Review deliberately replaces that pattern with coherence — which also directly improves sleep quality and HRV overnight.</div>
-        <div class="protocol-item"><span class="time">STEP 1 — 3 IN</span>Identify 3 moments from today when you felt coherent: connected, present, grateful, alive, competitive joy, love, peace, genuine confidence. These do not need to be big moments. A good meal. A moment of laughter. A rep that felt right. A quiet second in prayer. Find the felt memory — not just the thought of it.</div>
-        <div class="protocol-item"><span class="time">STEP 2 — 3 OUT</span>Identify 3 moments when you were pulled out of coherence: irritated, anxious, distracted, reactive, prideful, disconnected. Do not judge them. Do not analyze them. Just name them and notice — what was the trigger? What was the story your mind told? This is data, not condemnation.</div>
-        <div class="protocol-item"><span class="time">STEP 3 — RELEASE</span>Take one breath. Say internally or aloud: "It is finished. I give this day to God." This is not spiritual bypassing — it is a deliberate act of surrender that prevents the day's unresolved tension from being carried into your sleep and your next morning.</div>
-        <div class="protocol-item"><span class="time">TIMING</span>Do this in bed, lights down, after magnesium. It takes 3 minutes. It is not optional on heavy days — it is most important on heavy days, because that is when the most unprocessed tension exists.</div>
-        <div class="protocol-item"><span class="time">SIGNAL</span>You'll know it's working over time when you start naturally noticing coherence and incoherence during the day — not just in review. That real-time awareness is the performance skill. The Evening Review is how you build it.</div>
-      </div>
-    </div>
-
-    <!-- SACRED SILENCE -->
-    <div class="protocol-day">
-      <div class="protocol-day-header" onclick="toggleProtocol(this)">
-        <div class="protocol-day-title" style="color:var(--gold);">🤫 SACRED SILENCE — 5 Minutes</div>
-        <span style="color:var(--muted);font-size:18px;">+</span>
-      </div>
-      <div class="protocol-day-body">
-        <div class="protocol-item"><span class="time">WHAT</span>Five minutes of complete silence with no input, no output, no agenda. No music. No podcast. No prayer list. No visualization script. Nothing to do and nothing to produce. Just you and God — present, still, open.</div>
-        <div class="protocol-item"><span class="time">WHY</span>Every other practice in your protocol is active — you are doing something, producing something, generating something. Sacred silence is the counterweight. It is the space in which integration happens. Neurologically, it activates the default mode network — the system responsible for self-awareness, meaning-making, and creative insight. Spiritually, it is where you stop talking long enough to actually listen.</div>
-        <div class="protocol-item"><span class="time">STEP 1</span>Sit or lie still. Close your eyes. Set a 5-minute timer so you are not thinking about time. Put your phone face down and on silent before you start — not after.</div>
-        <div class="protocol-item"><span class="time">STEP 2</span>Do nothing. This is the entire instruction. If a thought comes, notice it and return to stillness. You are not trying to clear your mind — you are not gripping for emptiness. You are simply being present without agenda.</div>
-        <div class="protocol-item"><span class="time">STEP 3</span>If you feel an internal prompt — a word, an image, a sense of direction, a conviction — receive it without immediately analyzing it. Let it sit in you. You can examine it after. During the silence, just receive.</div>
-        <div class="protocol-item"><span class="time">WHEN</span>Ideally after the Evening Review, before sleep. Can also be done after morning Bible study or after the Heart Anchor. The key is consistency over timing — same window every day builds the neural groove.</div>
-        <div class="protocol-item"><span class="time">COMMON MISTAKE</span>Turning it into a performance. Trying to feel something. Judging the quality of the silence. Sacred silence is not graded. There is no good version and bad version. Showing up is the entire practice. The fruit appears in your day — not during the 5 minutes.</div>
-        <div class="protocol-item"><span class="time">SIGNAL</span>Over weeks, you will notice you handle disruption differently. Less reactivity. More space between stimulus and response. That gap — that pause before you react — is what you are building here. It is one of the most transferable skills in sport and in life.</div>
-      </div>
-    </div>
-
-    <div class="section-label" style="margin-top:24px;">Metric Targets</div>
-    <div class="card">
-      <div class="grid-3" style="gap:8px;">
-        <div class="summary-stat">
-          <div class="val" style="color:var(--green);">70+</div>
-          <div class="lbl">HRV ✅</div>
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span class="progress-label">Protocol Compliance</span>
+          <span class="progress-pct" id="habit-pct">0%</span>
         </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--yellow);">65-69</div>
-          <div class="lbl">HRV 🟡</div>
+        <div class="progress-track">
+          <div class="progress-bar" id="habit-bar"></div>
         </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--red);">&lt;65</div>
-          <div class="lbl">HRV 🔴</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--green);">85%+</div>
-          <div class="lbl">Recovery ✅</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--yellow);">70-84</div>
-          <div class="lbl">Recovery 🟡</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--red);">&lt;70</div>
-          <div class="lbl">Recovery 🔴</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--green);">&lt;15</div>
-          <div class="lbl">Resp ✅</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--yellow);">15-16</div>
-          <div class="lbl">Resp 🟡</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--red);">&gt;16</div>
-          <div class="lbl">Resp 🔴</div>
-        </div>
+        <div class="progress-count" id="habit-count">0 of 0 tasks complete</div>
       </div>
-    </div>
-  </div>
 
+      <div id="habits-list"></div>
 
-  <!-- ═══════════ PANEL: HISTORY ═══════════ -->
-  <div class="panel" id="panel-history">
-    <div class="section-label">Entry Log</div>
-    <div id="history-list">
-      <div class="empty-state">
-        <div class="empty-icon">📋</div>
-        <p>No entries yet.<br>Log your first entry in the Log tab.</p>
-      </div>
-    </div>
-  </div>
+      <button class="btn-submit" id="habit-save-btn" style="margin-top:16px;" onclick="saveHabits()">
+        SAVE HABITS &#8594; SHEETS
+      </button>
 
-
-  <!-- ═══════════ PANEL: WEEKLY ═══════════ -->
-  <div class="panel" id="panel-weekly">
-    <div class="section-label">7-Day Summary</div>
-    <div id="weekly-content">
-      <div class="empty-state">
-        <div class="empty-icon">📊</div>
-        <p>Log at least 3 entries to see your weekly summary and pattern analysis.</p>
-      </div>
     </div>
   </div>
 
 </div><!-- /container -->
 
-<!-- DETAIL MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" id="modal-content"></div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast">Entry saved ✓</div>
-
+<div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────
-let entries = JSON.parse(localStorage.getItem('rd33_entries') || '[]');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+</script>
 
-// ── INIT ──────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  const now = new Date();
-  document.getElementById('today-label').textContent =
-    now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' }).toUpperCase();
-  renderHistory();
-  renderWeekly();
+<script>
+// ─────────────────────────────────────────────────────────────
+//  CONFIG
+// ─────────────────────────────────────────────────────────────
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw4L4MXveCfuNrCU5nOf0ElZM8F5CRX8iz6CXEwGiswcBg3_9Q4DB5EGn8iQsTtaMsXLw/exec';
+
+// ─────────────────────────────────────────────────────────────
+//  HABIT DATA
+//  Each item: { t: "Title", d: "Description of exactly what to do" }
+// ─────────────────────────────────────────────────────────────
+var DAY_HABITS = {
+
+  'MON — OFF': [
+    { cat: '🌅 Morning', items: [
+      { t: '500ml water on wake',            d: 'Before anything else — before coffee, before phone. Drink 500ml water immediately on waking to rehydrate and kickstart metabolism.' },
+      { t: 'Sunlight within 30 min',         d: 'Step outside for 5-10 min of direct sunlight. No sunglasses. Anchors your circadian rhythm and sets cortisol timing for the day.' },
+      { t: 'Heart Anchor — 60 sec',          d: 'Hand on chest. 5.5 sec inhale through nose, 5.5 sec exhale through nose. 5-6 cycles. Focus on generating warmth or gratitude. Signal = warmth/settling in the chest.' },
+      { t: 'Bible study',                    d: 'Minimum 10 min. Read, meditate, let it speak. This is identity reinforcement — you are a son of God first. Not optional.' },
+      { t: 'Journaling — gratitude + presuppositions', d: 'Write 3 genuine gratitudes. Then write your presuppositions (truths you operate from). This is daily identity architecture, not morning inspiration content.' }
+    ]},
+    { cat: '🏃 Active Recovery', items: [
+      { t: '20-min walk — nasal breathing only', d: 'Easy pace, nose only the entire time. No mouth breathing. This keeps you in Zone 1-2 aerobic work, stimulates the vagus nerve, and accelerates recovery without adding stress.' },
+      { t: 'Mobility: hips, ankles, thoracic spine', d: '10-15 min. Hip 90/90 stretches, ankle circles and loaded dorsiflexion, thoracic rotations and foam rolling. Target whatever is restricted from the week.' },
+      { t: 'Contrast shower — 3-4 rounds',    d: '1 min hot / 30 sec cold, repeated 3-4 times. End cold. Accelerates circulation, reduces inflammation, trains the nervous system. Not optional on Monday.' }
+    ]},
+    { cat: '🍽️ Nutrition', items: [
+      { t: 'Anti-inflammatory breakfast',    d: 'Avoid processed food, refined sugar, seed oils. Prioritize eggs, berries, oats, Greek yogurt, salmon if available. Omega-3 rich today.' },
+      { t: 'Protein target 190g+ hit',       d: 'Monday is a recovery day — protein is the most important macronutrient today. 190g minimum across all meals. Spread across 4+ feedings.' },
+      { t: '3-4L hydration',                 d: 'Track it. Spread throughout the day — not all at once. Add electrolytes to at least one bottle especially if Monday follows a game weekend.' }
+    ]},
+    { cat: '🧠 Mindset', items: [
+      { t: 'Dispenza meditation',            d: 'Minimum 20-30 min. Use a full body scan or open monitoring session. Monday is ideal for resetting your internal state from the competition week.' },
+      { t: 'HeartMath / 5.5 breathing',      d: '10-15 min dedicated session. 5.5 in / 5.5 out, sustained. Goal is sustained heart coherence — the nervous system reset that Monday requires.' },
+      { t: 'Evening review — 3 in / 3 out',  d: '3 min practice. Hold 3 moments you are grateful for (breathe them in with the 5.5 breath). Hold 3 things you want to release (exhale them fully). End with a release prayer.' },
+      { t: 'Sacred silence — 5 min',         d: 'No input, no output, no agenda. No phone, no music, no podcasts. Just sit. Before sleep. This is how you process the week at a nervous system level.' }
+    ]},
+    { cat: '😴 Sleep', items: [
+      { t: 'Magnesium glycinate taken',      d: '200-400mg magnesium glycinate, 30-60 min before bed. Promotes deep sleep, muscle recovery, and nervous system downregulation. Non-negotiable on heavy training days.' },
+      { t: 'Hard bedtime 11:00 PM',          d: 'Lights out, phone away. Monday sleep is the first recovery night of the week — protect it.' },
+      { t: 'No screens 60 min before bed',   d: 'Blue light suppresses melatonin by 50%+. Use this time for reading, journaling, prayer, or stretching. Not scrolling.' }
+    ]}
+  ],
+
+  'TUE — HEAVY': [
+    { cat: '🌅 Morning', items: [
+      { t: '500ml water on wake',            d: 'Before coffee, before phone. Rehydrate immediately. Every morning.' },
+      { t: 'Sunlight within 30 min',         d: '5-10 min outside, no sunglasses. Sets cortisol rhythm and primes your nervous system for the heavy day ahead.' },
+      { t: 'Heart Anchor — 60 sec',          d: 'Hand on chest. 5.5 sec in / 5.5 sec out, 5-6 cycles. Generate warmth. Signal = settling in the chest. Do this before you check your phone.' },
+      { t: 'Bible study',                    d: 'Minimum 10 min. Identity anchor before a hard day. You compete from strength, not for it.' },
+      { t: 'Journaling — gratitude + presuppositions', d: '3 genuine gratitudes. Then your presuppositions. Set your mental frame for a heavy training day.' },
+      { t: 'Breakfast: shake + oats + banana + berries', d: 'Target: 60g protein, 70-80g carbs. Protein shake + oats + banana + berries. Eat within 45 min of waking. This fuels the lift.' }
+    ]},
+    { cat: '🏋️ Lift & Practice', items: [
+      { t: 'Post-lift bridge shake (1 scoop + fruit)', d: 'Within 15 min of finishing the lift — before you even change. 1 scoop whey + banana or dates. This is non-negotiable. The anabolic window is real and Tuesday is your heaviest lift day.' },
+      { t: 'Electrolytes during practice',   d: 'Start sipping early — not when you feel thirsty. That is already dehydrated. Aim for 500-750ml electrolyte drink through the session.' },
+      { t: 'Pre-practice meal timed (12:00-12:30 PM)', d: 'Full meal: pasta or rice + lean protein. Low fat, moderate fiber. Eat by 12:30 at the latest. Practice is typically 2:30 PM — this gives full digestion.' },
+      { t: 'Pre-practice Zoe declaration',   d: 'Before walking on the court: 3 deep breaths. Speak your declaration out loud or in your head: "I compete to raise the level of excellence in my life in order to raise it in others. Not for the trophy. Not for adoration. To discover something within me and fully experience this moment." Release the outcome.' },
+      { t: 'Post-practice nutrition within 30 min', d: 'Protein shake + banana, or chocolate milk + protein bar. Get carbs + protein into your system within 30 min of the final whistle. This window determines tomorrow\'s recovery quality.' }
+    ]},
+    { cat: '💊 Supplements', items: [
+      { t: 'Creatine 3-5g taken',            d: 'Timing flexible — morning or post-workout. Daily consistency is what matters. Monohydrate only. Confirmed WADA-compliant from Informed Sport or NSF certified source.' },
+      { t: 'Omega-3 (2-3g) taken',           d: 'With a meal. Reduces exercise-induced inflammation, supports joint health and cognitive function. Take with food for absorption.' },
+      { t: 'Tart cherry juice post-practice', d: '8oz (240ml) after practice. Contains natural anthocyanins that reduce muscle damage and inflammation. Has measurable effect on DOMS and WHOOP recovery score.' },
+      { t: 'Magnesium glycinate before bed', d: '200-400mg, 30-60 min before bed. Critical on heavy training nights for deep sleep quality.' }
+    ]},
+    { cat: '🍽️ Nutrition', items: [
+      { t: 'Protein target 190g+ hit',       d: 'Tuesday is your hardest training day. 190g is the floor. Track it. If you fall short, Greek yogurt + protein shake before bed fills the gap.' },
+      { t: 'Carb target 450-500g hit',       d: 'High output day requires high carb input. Pasta, rice, oats, fruit, bread. Not junk. This fuels both the lift and practice — two sessions in one day.' },
+      { t: 'Full dinner within 2 hrs post-practice', d: 'Not a snack. A full recovery meal: rice or pasta + protein + vegetables. Eat within 2 hrs of finishing practice to optimize overnight glycogen replenishment.' }
+    ]},
+    { cat: '🧠 Mindset', items: [
+      { t: 'Heart Anchor morning done',      d: 'Already logged above — confirming it was completed before leaving the apartment.' },
+      { t: 'Dispenza / HeartMath post-practice', d: '10-15 min after dinner settles. Heavy training days create physiological stress — this is the tool that converts stress into adaptation by signaling safety to the nervous system.' },
+      { t: 'Evening review — 3 in / 3 out',  d: '3 min. Hold 3 wins from today (practice, nutrition, mindset). Release 3 things that did not go your way. End with a brief prayer. Let the day go.' },
+      { t: 'Sacred silence — 5 min',         d: 'No input. Before sleep. Let your nervous system decompress from a high-load day.' }
+    ]},
+    { cat: '😴 Sleep', items: [
+      { t: 'Hard bedtime 11:00 PM',          d: 'Tuesday is your biggest recovery need of the week. Every hour before midnight counts double. Be in bed by 11.' },
+      { t: 'No screens 60 min before bed',   d: 'Blue light blocks melatonin and keeps the nervous system activated. Read, stretch, pray, or journal instead.' },
+      { t: 'Magnesium glycinate taken',      d: 'Already logged in supplements — confirming it was taken before bed, not just purchased.' }
+    ]}
+  ],
+
+  'WED — LATE': [
+    { cat: '🌅 Morning', items: [
+      { t: '500ml water on wake',            d: 'First thing. Before coffee, before phone. Every morning without exception.' },
+      { t: 'Heart Anchor — 60 sec',          d: 'Hand on chest. 5.5 breath, 5-6 cycles. Wednesday is a long day — anchor your state in the morning before it runs away from you.' },
+      { t: 'Bible study',                    d: 'Minimum 10 min. Especially important on Wednesday — you need identity clarity before a late practice night.' },
+      { t: 'Journaling — gratitude + presuppositions', d: '3 gratitudes + your presuppositions. Set your mental frame intentionally because Wednesday can drift if you let it.' },
+      { t: 'Breakfast eaten pre-lift',       d: 'Full breakfast before you lift. Protein + carbs. Do not train fasted on Wednesday — the day is too long.' }
+    ]},
+    { cat: '🏋️ Lift', items: [
+      { t: 'Post-lift bridge shake (1 scoop + fruit)', d: 'Immediately after the lift — within 15 min. 1 scoop whey + banana or dates. Bridges you to the pre-practice meal at 5-6 PM.' },
+      { t: 'Paraxanthine: HARD CUTOFF 2:00 PM', d: 'Do not take paraxanthine after 2:00 PM on Wednesday. Practice ends at 9:30 PM and you need to be asleep by 12:15 AM. Any stimulant after 2 PM will push your sleep back and cost you recovery.' }
+    ]},
+    { cat: '🌆 Pre-Practice (5-6 PM)', items: [
+      { t: 'FULL MEAL at 5:00-6:00 PM (this is dinner)', d: 'This is not a snack. This is your full dinner eaten before practice because eating after 9:30 PM will compromise sleep. Pasta or rice + lean protein + light vegetables. Eat by 6 PM — gives 90 min before warmup.' },
+      { t: 'Electrolytes packed for practice', d: 'Pack your bottle before leaving. Do not rely on finding water at the facility. Bring your electrolyte mix.' }
+    ]},
+    { cat: '🏀 Practice (7:30-9:30 PM)', items: [
+      { t: 'Electrolytes during practice',   d: 'Sip consistently. Late practices mean late hydration deficits — they stay in your system overnight and tank your HRV.' },
+      { t: 'Pre-practice Zoe declaration',   d: '3 breaths. Your declaration. Release the outcome. Do this in the locker room or tunnel before you walk onto the court. Do not skip it because the setting is different from a game.' }
+    ]},
+    { cat: '🌙 Post-Practice (arriving home ~10:45 PM)', items: [
+      { t: 'Lights down immediately on arriving home', d: 'When you walk in, dim every light. No overhead lighting. Lamps only or phone flashlight. Your melatonin has already been suppressed by the gym lights — do not compound it with bright home lighting.' },
+      { t: 'Recovery snack only if hungry',  d: 'You ate your full dinner at 5-6 PM. If genuinely hungry: Greek yogurt + honey or a small shake. No heavy meals at 10:45 PM. Digestion will wreck your sleep architecture.' },
+      { t: 'No stimulating content / screens', d: 'No intense videos, no social media arguments, no highlight reels that spike your nervous system. Calm music, stretching, or nothing. Your body needs to shift from high activation to sleep mode in under 90 min.' }
+    ]},
+    { cat: '💊 Wind Down', items: [
+      { t: 'Magnesium glycinate taken',      d: '200-400mg immediately on arriving home — not right before bed. You need it working by the time 12:15 AM arrives.' },
+      { t: 'Tart cherry juice',              d: '8oz (240ml) post-practice. Contains melatonin precursors and anthocyanins. On Wednesday nights, this is doing double duty: recovery and sleep support.' },
+      { t: 'HeartMath / 5.5 breathing — 5 min', d: '5 min of 5.5 in / 5.5 out nasal breathing while lying down. This is the single most effective tool you have for shifting from sympathetic (activated) to parasympathetic (recovery) state after a late game or practice.' },
+      { t: 'Prayer / Zoe evening practice', d: 'Brief. 2-3 min. Hold 3 things from today with gratitude. Release anything that is not yours to carry. This is not performance review — it is laying it down before sleep.' }
+    ]},
+    { cat: '😴 Sleep', items: [
+      { t: 'HARD BEDTIME 12:15 AM',          d: 'Non-negotiable. Wednesday is the most sleep-compromised night of your week by structure. 12:15 AM is the line. Every minute past this compounds. Do not let wind-down drift into 1 AM.' },
+      { t: 'Protein target 190g+ hit',       d: 'Check your total for the day. Between breakfast, bridge shake, pre-practice dinner, and any recovery snack — did you hit 190g? If not, a small shake now before bed.' }
+    ]}
+  ],
+
+  'THU — HEAVY': [
+    { cat: '🌅 Morning', items: [
+      { t: '500ml water on wake',            d: 'Especially important Thursday — you likely went to bed late Wednesday. Rehydrate before anything.' },
+      { t: 'Heart Anchor — 60 sec',          d: 'Hand on chest. 5.5 breath. Thursday mornings you may feel heavy from Wednesday\'s load. This is not optional on tired mornings — it is more important on tired mornings.' },
+      { t: 'Bible study + journaling',       d: 'Even if brief. 10 min combined. Thursday is the most underrated performance day of the week. Your mind sets the tone for the most important recovery window.' },
+      { t: 'Breakfast within 45 min — carb emphasis', d: 'Do not train in a carb deficit on Thursday. Oats + banana + shake or eggs + toast. Carbs first — your muscles are depleted from Tuesday and Wednesday.' },
+      { t: 'HRV logged',                     d: 'Check WHOOP before you get out of bed. Thursday HRV will often be lower than Monday. This tells you how to modulate today\'s effort. Do not override the data with ego.' }
+    ]},
+    { cat: '🏋️ Lift & Practice', items: [
+      { t: 'Post-lift bridge shake',         d: 'Within 15 min of lift. 1 scoop whey + fruit. Non-negotiable. Thursday\'s post-lift window is critical because practice follows.' },
+      { t: 'Pre-practice meal timed correctly', d: 'Full meal 2+ hours before practice. Pasta or rice + protein. Do not go into Thursday practice underfueled — your RPE will read artificially high and your body will underperform.' },
+      { t: '10-min visualization before practice', d: 'Sit quietly. Close your eyes. Walk through the practice in your mind. See yourself moving with confidence, making reads, competing at a high level. Feel it — do not just see it. This is mental rehearsal, not daydreaming.' },
+      { t: 'Pre-practice Zoe declaration',   d: '3 breaths. Declaration. Release the outcome. Thursday practice matters — this is the last full training session before the game weekend.' },
+      { t: 'Post-practice nutrition within 30 min', d: 'THIS IS THE MOST IMPORTANT NUTRITION WINDOW OF THE WEEK. Thursday post-practice nutrition directly determines Saturday performance. Protein shake + banana or full recovery meal within 30 min. Do not miss this.' }
+    ]},
+    { cat: '🔄 Recovery (Post-Practice Priority)', items: [
+      { t: 'Contrast shower — 3-4 rounds',   d: '1 min hot / 30 sec cold, 3-4 rounds, end cold. Drives blood flow, reduces muscle inflammation, and accelerates lymphatic drainage. Thursday contrast shower is mandatory — your body needs to be fresh for the weekend.' },
+      { t: 'Magnesium spray on legs + back', d: 'Transdermal magnesium applied directly to major muscle groups after the shower. 10-12 sprays per leg, 6-8 sprays on lower back. Absorbs directly into the tissue and reduces DOMS.' },
+      { t: 'Legs up wall — 15-20 min',       d: 'Literally lie on the floor with your legs vertical against the wall. Reverses venous pooling from hours of training, reduces leg heaviness, promotes lymphatic drainage. Do this while you do your Dispenza.' },
+      { t: 'Dispenza meditation during legs up wall', d: 'Stack these two. Lie with legs up the wall and run a Dispenza body scan or gratitude/elevation meditation simultaneously. You are doing physical AND psychological recovery in the same 15-20 min window.' }
+    ]},
+    { cat: '💊 Supplements', items: [
+      { t: 'Tart cherry juice post-practice', d: '8oz immediately after practice or with your recovery meal. Thursday is when your body needs it most — you are going into the game weekend.' },
+      { t: 'Magnesium glycinate before bed', d: '200-400mg. Thursday night sleep is the most performance-predictive sleep of the week. Magnesium protects it.' },
+      { t: 'Omega-3 (2-3g) with meal',       d: 'Anti-inflammatory support going into the game weekend. Consistency here compounds over a season.' }
+    ]},
+    { cat: '🍽️ Nutrition', items: [
+      { t: 'Protein target 190g+ hit',       d: 'Thursday protein drives the muscle repair that shows up as Saturday performance. Hit 190g. Non-negotiable.' },
+      { t: 'Carb target 450-500g hit',       d: 'High output day + game preparation = high carb requirement. You are also beginning glycogen loading for the weekend.' },
+      { t: 'Full dinner within 2 hrs post-practice', d: 'Real food recovery meal. Pasta or rice + protein + vegetables. Do not substitute this with snacks.' }
+    ]},
+    { cat: '😴 Sleep', items: [
+      { t: 'HARD BEDTIME 11:00 PM',          d: 'Thursday night sleep is the most performance-predictive sleep of the week. Not Friday. Not Saturday. THURSDAY. An hour of extra sleep Thursday night shows up in your Saturday shot selection, lateral quickness, and late-game energy. Protect it.' },
+      { t: 'No screens 60 min before bed',   d: 'Be in wind-down mode by 10 PM. No tactical film, no intense content, no social media. Your nervous system needs to decelerate.' }
+    ]}
+  ],
+
+  'FRI — LIGHT': [
+    { cat: '🌅 Morning', items: [
+      { t: '500ml water on wake',            d: 'First thing. You know the drill.' },
+      { t: 'Heart Anchor — 60 sec',          d: '5.5 breath, hand on chest, 5-6 cycles. Friday is when competition mindset begins to build. Anchor your state in the morning so it builds from a coherent foundation.' },
+      { t: 'Bible study + journaling',       d: 'Game weekend starts now mentally. Use journaling to set your competitive intention for Saturday. This is not casual reflection — this is mental preparation.' },
+      { t: 'HRV check — Thursday recovery report card', d: 'Check WHOOP. Thursday\'s sleep quality shows up in Friday\'s HRV. If recovery is 85%+, you are on track. If below 70%, Friday\'s protocol becomes even more conservative.' }
+    ]},
+    { cat: '🏋️ Lift & Practice', items: [
+      { t: 'Post-lift bridge shake',         d: '1 scoop whey + fruit within 15 min of lift. Even on light days. Maintain the pattern.' },
+      { t: 'Light practice — no extra voluntary work', d: 'Trust the process. Do not add extra shooting, extra conditioning, or extra anything on a Saturday game Friday. Save it. The body does its best work on game day when it is slightly fresh, not ground down. Coaches may push — you moderate internally.' },
+      { t: 'Pre-practice Zoe declaration',   d: 'Even at light practice. Build the habit. Declaration before every session, game day or not.' }
+    ]},
+    { cat: '🍽️ Nutrition', items: [
+      { t: 'Carb loading begins today',      d: 'Increase carb intake by 50-75g above normal today. Pasta, rice, oats, fruit. You are loading glycogen for Saturday. Familiar foods only from this point — nothing new.' },
+      { t: 'Familiar foods only',            d: 'Zero experimentation. No new restaurants, no new foods, nothing your gut has not processed before. Gut distress on Saturday starts with Friday food choices.' },
+      { t: 'Protein target 190g+ hit',       d: 'Maintain protein even on low carb days. 190g floor.' },
+      { t: 'Chef dinner: pasta + protein',   d: 'Simple, familiar, high-carb. Pasta with lean meat sauce or chicken. No complex sauces, no heavy cream, nothing experimental.' }
+    ]},
+    { cat: '🧠 Mindset', items: [
+      { t: 'Mental prep: visualization, film, competition mindset', d: 'Watch film on the opponent. 15-20 min visualization of Saturday game scenarios. Start activating your competitive identity intentionally — not by accident on the bus.' },
+      { t: 'Dispenza / HeartMath session',   d: '20-30 min. Use an elevated emotion session — gratitude, love, joy. You are building the internal state you want to compete from on Saturday.' },
+      { t: 'Full Zoe Protocol evening',      d: 'Heart Anchor + pre-competition mental rehearsal + evening review (3 in / 3 out) + sacred silence. Do the full sequence tonight.' },
+      { t: 'Sacred silence — 5 min',         d: 'Before sleep. No input. Let the preparation settle. Trust what you have built.' }
+    ]},
+    { cat: '😴 Sleep', items: [
+      { t: 'HARD BEDTIME 10:30-11:00 PM',    d: 'Lights out by 11. You want 8+ hours before a game Saturday. This means 10:30-11 PM if you wake between 6:30-7:30 AM.' },
+      { t: 'Magnesium glycinate',            d: '200-400mg, 30-60 min before bed. Game prep night supplement stack is non-negotiable.' },
+      { t: 'No screens after 9:30 PM',       d: 'Put the phone away. Read. Pray. Journal. Your final conscious state before sleep influences the quality of recovery and the mental state you wake into.' }
+    ]}
+  ],
+
+  'FRI — MOD': [
+    { cat: '🌅 Morning', items: [
+      { t: '500ml water on wake',            d: 'First thing, every morning.' },
+      { t: 'Heart Anchor — 60 sec',          d: '5.5 breath, hand on chest, 5-6 cycles. Sunday game means Saturday is an activation day — build your competitive state from a coherent base.' },
+      { t: 'Bible study + journaling',       d: '10 min combined. Set your mental frame for a moderate training day heading into a Sunday game weekend.' },
+      { t: 'HRV check',                      d: 'Check WHOOP. This data tells you how aggressive to be in today\'s moderate practice. Let the biology inform the approach.' }
+    ]},
+    { cat: '🏋️ Lift & Practice', items: [
+      { t: 'Post-lift bridge shake',         d: 'Within 15 min of lift. 1 scoop whey + fruit. Keep the pattern.' },
+      { t: 'Moderate practice — Saturday is activation day', d: 'Compete in practice but do not bury yourself. You are peaking on Sunday, not today. Effort is high, volume is moderate. Save the legs.' },
+      { t: 'Pre-practice Zoe declaration',   d: '3 breaths. Declaration. Release outcome. Every session.' },
+      { t: 'Post-practice nutrition within 30 min', d: 'Shake + carbs within 30 min. The recovery from today\'s moderate practice carries into Saturday activation and Sunday performance.' }
+    ]},
+    { cat: '🍽️ Nutrition', items: [
+      { t: 'Protein + carb balance today',   d: 'Slightly elevated carbs (400-450g) heading into the Sunday game weekend. Familiar foods. Clean eating — no gut experiments.' },
+      { t: 'Protein target 190g+ hit',       d: '190g floor. Every day.' },
+      { t: 'Chef dinner: quality protein + carbs', d: 'Pasta or rice + lean protein. Simple, familiar. Begin carb accumulation for Sunday.' }
+    ]},
+    { cat: '🧠 Mindset', items: [
+      { t: 'Dispenza / HeartMath session',   d: '15-20 min. Elevated emotion — gratitude or heart coherence. You are building Sunday\'s competitive state from the inside out starting now.' },
+      { t: 'Evening review — 3 in / 3 out',  d: '3 wins, 3 things to release, brief prayer. Let today go cleanly.' },
+      { t: 'Sacred silence — 5 min',         d: 'Before sleep. No input.' }
+    ]},
+    { cat: '😴 Sleep', items: [
+      { t: 'Hard bedtime 11:00 PM',          d: 'Protected. Saturday activation day requires a well-rested body.' },
+      { t: 'Magnesium glycinate',            d: '200-400mg before bed.' }
+    ]}
+  ],
+
+  'SAT — GAME': [
+    { cat: '🌅 Morning', items: [
+      { t: 'Natural wake — no alarm',        d: 'Do not set an alarm on game day unless absolutely necessary for travel. Let your body complete its final sleep cycle. Waking mid-cycle creates grogginess that can persist for hours.' },
+      { t: '500ml water + electrolytes immediately', d: 'The moment you are awake — water with electrolytes. You have been dehydrating for 7-9 hours. This is not optional on game day.' },
+      { t: 'Sunlight within 30 min',         d: 'Step outside. Direct light, no sunglasses. Anchors cortisol timing and sets your body clock for peak activation at game time.' },
+      { t: 'HRV logged',                     d: 'Check WHOOP before getting out of bed. Your recovery score tells you how much mental energy to invest in pre-game activation versus conservation. Read the data, adjust accordingly.' },
+      { t: 'Game day breakfast: shake + oats + banana (no kefir)', d: 'Your standard breakfast — familiar, tested, trusted. Protein shake + oats + banana. No kefir today — fermented foods can cause gut unpredictability on game days. Eat within 45 min of waking.' }
+    ]},
+    { cat: '🧠 Pre-Game Mental', items: [
+      { t: 'Optional walk — 15-20 min nasal breathing', d: 'If you feel good and loose, a short walk helps blood flow and mental clarity. Nasal only. This is not training — it is activation. Skip it if you feel fatigued.' },
+      { t: 'Dispenza + visualization + prayer (10:00 AM)', d: 'This is the anchor of your game day mental prep. 20-30 min. Guided visualization: walk through the game. See specific scenarios. Feel your body moving well. Feel the emotion of competing at your highest level. Then pray — release the outcome.' },
+      { t: 'Walk through game mentally — feel it, not just see it', d: 'Visualization without sensation is just imagination. You need to feel your feet on the court, feel the ball, feel yourself make a read and execute. Bring your body into the mental rehearsal. This activates the same neural pathways as physical practice.' }
+    ]},
+    { cat: '🍽️ Pre-Travel Meal (11:00 AM)', items: [
+      { t: '100-120g carbs / 35-40g protein / low fat + fiber', d: 'This is your last real meal before the game. High carb, moderate protein, LOW fat and fiber (both slow digestion and can cause gut issues during play). Rice + chicken or pasta + lean meat. Nothing new, nothing heavy, nothing fried.' },
+      { t: 'Familiar food only — nothing new today', d: 'Zero experimentation. Game day gut health is protected by eating only foods your body has processed before. Not the day to try something new at the team hotel.' },
+      { t: 'Packed: electrolytes, banana/dates, headphones', d: 'Before you leave the apartment: electrolyte bottles, banana or dates for the 4:30 PM carb hit, and headphones for the bus. Check the bag.' }
+    ]},
+    { cat: '🚌 Bus (12:15 PM)', items: [
+      { t: 'Sipping electrolytes on bus',    d: 'Not gulping — sipping. Consistent hydration from departure to tip-off. Your body will lose water even sitting still from stress activation.' },
+      { t: 'Mental decompression — first 30 min', d: 'First 30 min of the bus: do not think about basketball. Music, podcast, scenery. Let your prefrontal cortex rest before you begin mental activation. Do not front-load stress.' },
+      { t: 'Light visualization — final 30 min', d: 'Last 30 min before arrival: begin moving your mind toward the game. Specific plays, defensive reads, first possession of the game, how you want to feel in the opening minutes.' }
+    ]},
+    { cat: '⚡ Venue Activation', items: [
+      { t: '3:30 PM — PARAXANTHINE taken',   d: 'For a 6 PM tip-off, 3:30 PM is optimal. Paraxanthine peaks in ~1 hour. You want peak activation from 4:30-4:45 PM through the second half. Do not take it earlier — you will peak too soon.' },
+      { t: '4:00 PM — Extended warm up',     d: 'Full body. Not rushed. Shooting, movement prep, activation work. Get sweat going, get your shot rhythm. This is not optional when you arrive early.' },
+      { t: '4:30 PM — Last carb hit',        d: 'Banana or 4-6 dates. Fast-digesting carbs that top off blood glucose right before activation begins. Small volume — not a meal.' },
+      { t: '5:30 PM — Locker room Zoe declaration', d: 'In the locker room before warmups. 3 breaths. Your full declaration out loud or in your head. Then release the outcome completely. Walk onto the court free.' }
+    ]},
+    { cat: '🔄 Post-Game', items: [
+      { t: 'Protein + carbs within 30 min of final buzzer', d: 'Before you shower, before you speak to anyone — protein shake + banana or at minimum a bar. This window is critical for muscle repair and glycogen replenishment.' },
+      { t: '500ml water + electrolytes on bus', d: 'Begin rehydration immediately. You are likely 1.5-2.5% dehydrated by the end of the game. Start filling the tank on the bus.' },
+      { t: 'Begin parasympathetic shift on bus', d: 'Nasal breathing, calm music, minimal conversation. Your nervous system is still in sympathetic fight mode. Help it shift. Do not amp up on the bus ride home.' },
+      { t: 'Full recovery dinner at home',   d: 'Real food. Pasta, rice, lean protein, vegetables. Not fast food. Not a snack. A full meal even if you are not hungry — your body needs it overnight.' },
+      { t: 'Magnesium + tart cherry',        d: 'Magnesium glycinate 200-400mg + 8oz tart cherry juice before bed. Both are doing recovery work while you sleep.' },
+      { t: 'HeartMath 10 min post-game',     d: '10 min of 5.5 breathing, ideally in bed. After the adrenaline of a game, this is the bridge between competition state and sleep state. Non-negotiable for sleep quality after a game.' },
+      { t: 'Prayer — release the game',      d: 'Before sleep. However you performed — release it. You are not your stats. You are not your mistakes. Return to identity. Then sleep.' },
+      { t: 'Bedtime by 12:00-12:30 AM',      d: 'Hard limit. Post-game adrenaline will try to keep you up. The HeartMath session and prayer are your tools to override it. Lights out by 12:30.' }
+    ]}
+  ],
+
+  'SAT — LIGHT': [
+    { cat: '🌅 Morning', items: [
+      { t: '500ml water on wake',            d: 'Every morning. Rehydrate before anything else.' },
+      { t: 'Sunlight within 30 min',         d: '5-10 min outside. Sunday game means Saturday is the most important sleep and carb load of the week.' },
+      { t: 'Heart Anchor — 60 sec',          d: '5.5 breath, hand on chest. Game day tomorrow. Build your state from a coherent base today.' },
+      { t: 'Bible study + journaling',       d: 'Use journaling today to write your intention for Sunday\'s game. Not a prediction — an intention for how you want to compete and who you want to be on the court.' },
+      { t: 'HRV logged',                     d: 'Check WHOOP. Guides how aggressive to be in today\'s light practice and how much activation you need versus conservation.' },
+      { t: 'Breakfast — begin carb load',    d: 'Higher carb than normal. Oats + banana + shake. Start accumulating glycogen. Familiar foods.' }
+    ]},
+    { cat: '🍽️ Pre-Practice Meal (11:00 AM)', items: [
+      { t: 'Full meal — protein + carbs',    d: 'Pasta or rice + lean protein. This fuels the afternoon session and continues carb loading. Eat by 11 AM.' },
+      { t: 'Hydration loading begun',        d: 'From this point forward, sip water and electrolytes consistently. You want to go into Sunday\'s game fully hydrated from the day before.' }
+    ]},
+    { cat: '🏀 Light Practice (2:30 PM)', items: [
+      { t: 'Activation only — no extra work', d: 'This session is about neural activation, not training stress. Get a sweat, get your shot rhythm, feel sharp. Do not add anything extra. Do not try to fix things at light practice the day before a game.' },
+      { t: 'Pre-practice Zoe declaration',   d: '3 breaths. Declaration. Release outcome. Even at light practice. Especially the day before a game — you are setting your competitive identity.' },
+      { t: 'Post-practice bridge snack (4:00-4:30 PM)', d: 'Shake + banana or toast + peanut butter. Small carb + protein bridge between practice and the carb-loading dinner.' }
+    ]},
+    { cat: '🌆 Evening', items: [
+      { t: 'Chef dinner 6:00-7:00 PM — PRIMARY carb load', d: 'This is the most important meal of the week. Pasta or rice + lean protein. Simple preparation. Nothing new. Eat enough — you are loading glycogen for a 6 PM tip-off tomorrow. This meal shows up in your 4th quarter legs.' },
+      { t: 'Pasta + lean protein, simple prep', d: 'Pasta is the gold standard. Simple sauce, lean meat or chicken. No heavy cream sauces, no fried foods. You want the carbs absorbed cleanly.' }
+    ]},
+    { cat: '🧠 Pre-Game Night', items: [
+      { t: 'Wind down begins 8:00 PM',       d: 'At 8 PM, begin transitioning. Dim lights, lower stimulation. No intense content. You need to be asleep by 10:30 PM for Sunday and your nervous system needs a 2+ hour runway.' },
+      { t: 'HeartMath + Zoe prayer 9:30 PM', d: '10-15 min of 5.5 breathing + your Zoe evening prayer at 9:30 PM. This is your final mental prep before the game. Set your intention. Release the outcome.' },
+      { t: 'Visualization: walk through Sunday game', d: 'Lie in bed. Close your eyes. Walk through Sunday\'s game in your mind. Feel your opening possession. Feel yourself make a key defensive play. Feel how you want to respond to adversity. Visualize competing with freedom and conviction.' }
+    ]},
+    { cat: '😴 Critical Sleep', items: [
+      { t: 'HARD BEDTIME 10:30 PM',          d: 'This is the most important sleep of the week when Sunday is the game. 10:30 PM lights out — no exceptions. Every minute past this is a direct cost to Sunday performance.' },
+      { t: 'Magnesium glycinate',            d: '200-400mg, taken by 9:30 PM so it is active at sleep onset.' },
+      { t: 'Tart cherry juice',              d: '8oz before bed. Recovery + natural melatonin precursors.' },
+      { t: 'No screens after 8:00 PM',       d: 'Phone away by 8 PM. This is not a suggestion — Saturday night before a game, blue light exposure and content consumption directly impact sleep quality and Sunday performance. Make the trade.' }
+    ]}
+  ],
+
+  'SUN — GAME': [
+    { cat: '🌅 Morning', items: [
+      { t: 'Natural wake — no alarm',        d: 'Let your body complete its sleep cycle. If you went to bed at 10:30 PM you should wake naturally around 6:30-7:30 AM. Do not force it.' },
+      { t: '500ml water + electrolytes immediately', d: 'The moment you are awake. Rehydrate before you do anything else.' },
+      { t: 'Sunlight within 30 min',         d: 'Step outside. Set your cortisol and circadian timing for peak activation at game time.' },
+      { t: 'HRV logged',                     d: 'Check WHOOP before getting out of bed. Read the data. Let it inform your activation approach today.' },
+      { t: 'Game day breakfast: shake + oats + banana (no kefir)', d: 'Standard game day breakfast. Tested, familiar, trusted. No kefir — gut safety first on game day.' }
+    ]},
+    { cat: '🧠 Pre-Game Mental', items: [
+      { t: 'Optional walk — 15-20 min nasal breathing', d: 'Short walk if you feel ready. Nasal only. Activates blood flow and sharpens mental clarity. Skip if fatigued — conservation wins today.' },
+      { t: 'Dispenza + visualization + prayer (10:00 AM)', d: '20-30 min. Walk through the game. Feel it. Pray. Release the outcome. This is the most important mental practice of the week — do not skip it because Sunday feels different from Saturday.' },
+      { t: 'Walk through game mentally — feel it', d: 'Feel your body moving on the court. Feel specific game scenarios. Feel yourself respond to adversity with clarity. This is neurological preparation — your brain fires the same patterns in visualization as in live competition.' }
+    ]},
+    { cat: '🍽️ Pre-Travel Meal (11:00 AM)', items: [
+      { t: '100-120g carbs / 35-40g protein / low fat + fiber', d: 'Last real pre-game meal. High carb, moderate protein, low fat and fiber. Rice + chicken or pasta + lean meat. Eat by 11 AM.' },
+      { t: 'Familiar food only',             d: 'Zero experimentation. Every food you eat today has been eaten before game day before.' },
+      { t: 'Packed: electrolytes, banana/dates, headphones', d: 'Check the bag before you leave. Electrolytes, carb snacks for 4:30 PM, headphones.' }
+    ]},
+    { cat: '🚌 Bus (12:15 PM)', items: [
+      { t: 'Sipping electrolytes on bus',    d: 'Consistent hydration from departure. Sip, do not gulp.' },
+      { t: 'Mental decompression — protect your headspace', d: 'The bus is not the place to think about basketball yet. First 30-45 min: music, rest, decompress. Let your prefrontal cortex rest before activation begins.' }
+    ]},
+    { cat: '⚡ Venue Activation', items: [
+      { t: '3:30 PM — PARAXANTHINE taken',   d: '90 min before tip-off. Peak activation hits at 4:30-4:45 PM and carries through the second half. Do not take earlier.' },
+      { t: '4:00 PM — Extended warm up',     d: 'Full body warm up. Shooting rhythm. Movement activation. Get the first sweat of the day going.' },
+      { t: '4:30 PM — Last carb hit',        d: 'Banana or 4-6 dates. Top off blood glucose. Small volume — not a meal.' },
+      { t: '5:30 PM — Locker room Zoe declaration', d: '3 breaths. Full declaration. Release the outcome. Walk out free.' }
+    ]},
+    { cat: '🔄 Post-Game', items: [
+      { t: 'Protein + carbs within 30 min of final buzzer', d: 'Before anything else — get protein and carbs in. Shake + banana or a bar. Start recovery.' },
+      { t: '500ml water + electrolytes on bus', d: 'Begin rehydration on the bus. Sip the entire ride home.' },
+      { t: 'Full recovery dinner at home',   d: 'Real food. Not fast food, not a snack. Pasta or rice + protein + vegetables.' },
+      { t: 'Magnesium + tart cherry',        d: 'Magnesium glycinate + 8oz tart cherry before bed. Recovery support through the night.' },
+      { t: 'HeartMath 10 min',               d: '10 min of 5.5 breathing in bed. Bridge from competition state to sleep state. Critical for sleep quality after a game.' },
+      { t: 'Prayer — release the game',      d: 'Release the game. Release the performance, good or bad. You are not your stats. Return to identity and sleep.' },
+      { t: 'Bedtime 12:00-12:30 AM',         d: 'Hard limit. Lights out by 12:30 AM.' }
+    ]}
+  ],
+
+  'SUN — OFF': [
+    { cat: '🌅 Morning', items: [
+      { t: 'Sleep until natural wake',       d: 'Do not set an alarm. Your body knows what it needs after a game weekend. Let it sleep until it is done.' },
+      { t: '500ml water on wake',            d: 'First thing. Rehydrate after a game weekend and likely a late night.' },
+      { t: 'Sunlight within 30 min',         d: 'Step outside. Resets your cortisol rhythm after the disrupted weekend schedule.' },
+      { t: 'Heart Anchor — 60 sec',          d: '5.5 breath, hand on chest. Sunday is a transition day — anchor your identity before the week starts again.' },
+      { t: 'Bible study + journaling',       d: 'Reflect on Saturday\'s performance with grace and honesty. What did you compete well? What showed you something about yourself — positive or negative? Write it down.' }
+    ]},
+    { cat: '🏃 Active Recovery', items: [
+      { t: '20-min walk — nasal breathing',  d: 'Low intensity, nasal only. This is Zone 1 active recovery — promotes blood flow and lactate clearance without adding training stress. A walk, not a workout.' },
+      { t: 'Mobility: hips, ankles, thoracic spine', d: '10-15 min. Address whatever is restricted after the game. Hip 90/90, ankle loading, thoracic foam rolling.' },
+      { t: 'Contrast shower',                d: '3-4 rounds, hot/cold, end cold. Standard recovery protocol after a game.' }
+    ]},
+    { cat: '🍽️ Nutrition', items: [
+      { t: 'Anti-inflammatory focus',        d: 'Prioritize omega-3 rich foods, berries, leafy greens, turmeric, ginger if accessible. Reduce processed foods today. You are fighting post-game inflammation.' },
+      { t: 'Omega-3 rich foods',             d: 'Salmon, sardines, or take your 2-3g fish oil supplement. Post-game anti-inflammatory nutrition is a performance investment for next week.' },
+      { t: 'Protein target 190g+ hit',       d: 'Muscle repair from the game happens over 48-72 hours. Hit 190g today to support it.' },
+      { t: '3-4L hydration',                 d: 'Rehydrate fully from the game. You are likely still slightly dehydrated from Saturday.' }
+    ]},
+    { cat: '🧠 Mindset', items: [
+      { t: 'Reflect on performance — log entry', d: 'Write a journal entry on Saturday\'s game. What showed up? Where were you free? Where were you tight? What does God want to show you through this? Not a film session — a soul session.' },
+      { t: 'Dispenza meditation',            d: '20-30 min. Reset your internal state after the compressed emotion and exertion of a game weekend. This is neurological maintenance.' },
+      { t: 'Full Zoe weekly audit',          d: 'Once per week, review the three presuppositions: Surrender Over Optimization, Expansion Over Reframing, Identity Before Activity. Where did you live from these this week? Where did you drift? No judgment — just honest accounting.' },
+      { t: 'Sacred silence — 5 min',         d: 'Before sleep. No input. Weekly close.' }
+    ]},
+    { cat: '😴 Sleep', items: [
+      { t: 'Magnesium glycinate',            d: '200-400mg before bed. Consistent even on off days.' },
+      { t: 'Hard bedtime 11:00 PM',          d: 'Reset your sleep schedule for the week ahead. Sunday night sleep launches Monday\'s recovery quality.' }
+    ]}
+  ]
+};
+
+// ─────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var fmt = new Date().toLocaleDateString('en-US', {
+    weekday:'short', month:'short', day:'numeric', year:'numeric'
+  }).toUpperCase();
+  document.getElementById('log-date').textContent = fmt;
+  document.getElementById('habit-date').textContent = fmt;
 });
 
-// ── TABS ──────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
+// ─────────────────────────────────────────────────────────────
+//  TABS
+// ─────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
-  if (name === 'history') renderHistory();
-  if (name === 'weekly') renderWeekly();
-  if (name === 'checklist') {
-    const now = new Date();
-    document.getElementById('checklist-date-label').textContent =
-      now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' }).toUpperCase();
-  }
 }
 
-// ── SLIDER ────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+//  SLIDERS
+// ─────────────────────────────────────────────────────────────
 function updateSlider(id, valId) {
   document.getElementById(valId).textContent = document.getElementById(id).value;
 }
 
-// ── CHECKLIST ─────────────────────────────────────────
-function toggleCheck(el) {
+// ─────────────────────────────────────────────────────────────
+//  LOAD HABITS
+// ─────────────────────────────────────────────────────────────
+function loadHabits() {
+  var dayType = document.getElementById('habit-day-type').value;
+  var emptyEl   = document.getElementById('habits-empty');
+  var contentEl = document.getElementById('habits-content');
+  var listEl    = document.getElementById('habits-list');
+
+  if (!dayType) {
+    emptyEl.style.display = '';
+    contentEl.style.display = 'none';
+    return;
+  }
+
+  // Normalize key — HTML entities become real em-dashes in JS
+  var key = dayType.replace(/&#8212;/g, '\u2014');
+  var sections = DAY_HABITS[key];
+  if (!sections) {
+    // Try direct match
+    sections = DAY_HABITS[dayType];
+  }
+
+  emptyEl.style.display = 'none';
+  contentEl.style.display = '';
+
+  if (!sections) { listEl.innerHTML = '<p style="color:var(--muted);padding:20px;">Protocol not found.</p>'; return; }
+
+  var html = '';
+  for (var i = 0; i < sections.length; i++) {
+    var sec = sections[i];
+    html += '<div class="habit-cat">' + sec.cat + '</div>';
+    for (var j = 0; j < sec.items.length; j++) {
+      var item = sec.items[j];
+      html += '<div class="check-item" onclick="toggleHabit(this)">';
+      html += '<div class="check-box">&#10003;</div>';
+      html += '<div class="check-content">';
+      html += '<div class="check-title">' + item.t + '</div>';
+      html += '<div class="check-desc">' + item.d + '</div>';
+      html += '</div>';
+      html += '</div>';
+    }
+  }
+
+  listEl.innerHTML = html;
+  updateProgress();
+}
+
+function toggleHabit(el) {
   el.classList.toggle('checked');
+  updateProgress();
 }
 
-// ── PROTOCOL ACCORDION ────────────────────────────────
-function toggleProtocol(header) {
-  const body = header.nextElementSibling;
-  const icon = header.querySelector('span');
-  const isOpen = body.classList.contains('open');
-  document.querySelectorAll('.protocol-day-body').forEach(b => b.classList.remove('open'));
-  document.querySelectorAll('.protocol-day-header span').forEach(s => s.textContent = '+');
-  if (!isOpen) {
-    body.classList.add('open');
-    icon.textContent = '−';
-  }
-}
+function updateProgress() {
+  var all  = document.querySelectorAll('#habits-list .check-item');
+  var done = document.querySelectorAll('#habits-list .check-item.checked');
+  var total = all.length;
+  var doneN = done.length;
+  var pct   = total ? Math.round((doneN / total) * 100) : 0;
 
-// ── GOOGLE SHEETS URL ─────────────────────────────────
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw4L4MXveCfuNrCU5nOf0ElZM8F5CRX8iz6CXEwGiswcBg3_9Q4DB5EGn8iQsTtaMsXLw/exec';
+  document.getElementById('habit-pct').textContent   = pct + '%';
+  document.getElementById('habit-count').textContent = doneN + ' of ' + total + ' tasks complete';
 
-// ── SAVE ENTRY ────────────────────────────────────────
-function saveEntry() {
-  const checks = [];
-  document.querySelectorAll('#protocol-checklist .check-item').forEach(item => {
-    checks.push({
-      label: item.querySelector('.check-text').textContent,
-      done: item.classList.contains('checked')
-    });
-  });
-
-  const totalChecks = checks.length;
-  const doneChecks = checks.filter(c => c.done).length;
-  const compliance = totalChecks ? Math.round((doneChecks / totalChecks) * 100) : 0;
-
-  const entry = {
-    id: Date.now(),
-    date: new Date().toISOString(),
-    dateLabel: document.getElementById('today-label').textContent,
-    dayType: document.getElementById('day-type-select').value,
-    hrv: document.getElementById('hrv').value,
-    recovery: document.getElementById('recovery').value,
-    strain: document.getElementById('strain').value,
-    sleepScore: document.getElementById('sleep-score').value,
-    sleepHrs: document.getElementById('sleep-hrs').value,
-    rhr: document.getElementById('rhr').value,
-    resp: document.getElementById('resp').value,
-    deepSleep: document.getElementById('deep-sleep').value,
-    energy: document.getElementById('energy').value,
-    soreness: document.getElementById('soreness').value,
-    jointNotes: document.getElementById('joint-notes').value,
-    perf: document.getElementById('perf').value,
-    mentalSharp: document.getElementById('mental-sharp').value,
-    compFeel: document.getElementById('comp-feel').value,
-    mood: document.getElementById('mood').value,
-    protocolCompliance: compliance + '%',
-    checks: checks,
-    notes: document.getElementById('notes').value,
-  };
-
-  // Save locally first — always works
-  entries.unshift(entry);
-  localStorage.setItem('rd33_entries', JSON.stringify(entries));
-  renderHistory();
-
-  // Sync to Google Sheets
-  const btn = document.getElementById('save-btn');
-  btn.textContent = 'SYNCING...';
-  btn.style.background = 'var(--blue)';
-  btn.disabled = true;
-
-  fetch(SHEETS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(entry)
-  })
-  .then(() => {
-    showToast('✓ Saved locally + synced to Google Sheets');
-    btn.textContent = 'SAVE ENTRY';
-    btn.style.background = '';
-    btn.disabled = false;
-    resetForm();
-  })
-  .catch(() => {
-    showToast('✓ Saved locally — sheet sync failed (check connection)');
-    btn.textContent = 'SAVE ENTRY';
-    btn.style.background = '';
-    btn.disabled = false;
-    resetForm();
-  });
-}
-
-function resetForm() {
-  ['hrv','recovery','strain','sleep-score','sleep-hrs','rhr','resp','joint-notes','notes'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  ['deep-sleep','mental-sharp','comp-feel'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  ['energy','soreness','perf','mood'].forEach(id => {
-    document.getElementById(id).value = 7;
-  });
-  updateSlider('energy','energy-val');
-  updateSlider('soreness','soreness-val');
-  updateSlider('perf','perf-val');
-  updateSlider('mood','mood-val');
-  document.querySelectorAll('#protocol-checklist .check-item').forEach(i => i.classList.remove('checked'));
-  document.getElementById('day-type-select').value = '';
-}
-
-// ── TOAST ─────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ── STATUS COLOR ──────────────────────────────────────
-function metricBadge(label, val, thresholds) {
-  if (!val) return '';
-  const num = parseFloat(val);
-  let cls = 'green';
-  if (thresholds) {
-    if (num < thresholds.red) cls = 'red';
-    else if (num < thresholds.yellow) cls = 'yellow';
-  }
-  return `<span class="metric-badge ${cls}">${label}: ${val}</span>`;
-}
-
-function hrvClass(v) {
-  if (!v) return 'yellow';
-  const n = parseFloat(v);
-  return n >= 70 ? 'green' : n >= 65 ? 'yellow' : 'red';
-}
-function recClass(v) {
-  if (!v) return 'yellow';
-  const n = parseFloat(v);
-  return n >= 85 ? 'green' : n >= 70 ? 'yellow' : 'red';
-}
-function respClass(v) {
-  if (!v) return 'yellow';
-  const n = parseFloat(v);
-  return n < 15 ? 'green' : n <= 16 ? 'yellow' : 'red';
-}
-
-// ── RENDER HISTORY ────────────────────────────────────
-function renderHistory() {
-  const container = document.getElementById('history-list');
-  if (!entries.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No entries yet.<br>Log your first entry in the Log tab.</p></div>`;
-    return;
-  }
-
-  container.innerHTML = entries.map(e => `
-    <div class="history-entry" onclick="openModal(${e.id})">
-      <div class="history-entry-header">
-        <div class="history-date">${e.dateLabel}</div>
-        ${e.dayType ? `<span class="day-type-badge">${e.dayType}</span>` : ''}
-      </div>
-      <div class="history-metrics">
-        ${e.hrv ? `<span class="metric-badge ${hrvClass(e.hrv)}">HRV ${e.hrv}</span>` : ''}
-        ${e.recovery ? `<span class="metric-badge ${recClass(e.recovery)}">REC ${e.recovery}%</span>` : ''}
-        ${e.sleepScore ? `<span class="metric-badge ${recClass(e.sleepScore)}">SLEEP ${e.sleepScore}%</span>` : ''}
-        ${e.resp ? `<span class="metric-badge ${respClass(e.resp)}">RESP ${e.resp}</span>` : ''}
-        ${e.strain ? `<span class="metric-badge yellow">STR ${e.strain}</span>` : ''}
-        ${e.perf ? `<span class="metric-badge ${parseFloat(e.perf)>=8?'green':parseFloat(e.perf)>=6?'yellow':'red'}">PERF ${e.perf}/10</span>` : ''}
-      </div>
-      ${e.notes ? `<div style="margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5;">${e.notes.substring(0,100)}${e.notes.length>100?'…':''}</div>` : ''}
-    </div>
-  `).join('');
-}
-
-// ── MODAL ─────────────────────────────────────────────
-function openModal(id) {
-  const e = entries.find(x => x.id === id);
-  if (!e) return;
-
-  const doneChecks = e.checks ? e.checks.filter(c => c.done) : [];
-  const totalChecks = e.checks ? e.checks.length : 0;
-  const compliance = totalChecks ? Math.round((doneChecks.length / totalChecks) * 100) : 0;
-
-  document.getElementById('modal-content').innerHTML = `
-    <div class="modal-header">
-      <div>
-        <div style="font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;">${e.dateLabel}</div>
-        ${e.dayType ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);margin-top:2px;">${e.dayType}</div>` : ''}
-      </div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-
-    <div class="modal-section">
-      <div class="modal-section-title">Biometrics</div>
-      <div class="modal-grid">
-        <div class="modal-metric"><div class="mv" style="color:var(--${hrvClass(e.hrv)})">${e.hrv||'—'}</div><div class="ml">HRV</div></div>
-        <div class="modal-metric"><div class="mv" style="color:var(--${recClass(e.recovery)})">${e.recovery||'—'}${e.recovery?'%':''}</div><div class="ml">Recovery</div></div>
-        <div class="modal-metric"><div class="mv" style="color:var(--yellow)">${e.strain||'—'}</div><div class="ml">Strain</div></div>
-        <div class="modal-metric"><div class="mv" style="color:var(--${recClass(e.sleepScore)})">${e.sleepScore||'—'}${e.sleepScore?'%':''}</div><div class="ml">Sleep Score</div></div>
-        <div class="modal-metric"><div class="mv">${e.sleepHrs||'—'}${e.sleepHrs?'h':''}</div><div class="ml">Sleep Hrs</div></div>
-        <div class="modal-metric"><div class="mv" style="color:var(--${respClass(e.resp)})">${e.resp||'—'}</div><div class="ml">Resp Rate</div></div>
-      </div>
-    </div>
-
-    <div class="modal-section">
-      <div class="modal-section-title">Performance & Feel</div>
-      <div class="modal-grid">
-        <div class="modal-metric"><div class="mv" style="color:var(--${parseFloat(e.energy)>=8?'green':parseFloat(e.energy)>=5?'yellow':'red'})">${e.energy||'—'}/10</div><div class="ml">Energy</div></div>
-        <div class="modal-metric"><div class="mv" style="color:var(--${parseFloat(e.perf)>=8?'green':parseFloat(e.perf)>=6?'yellow':'red'})">${e.perf||'—'}/10</div><div class="ml">Performance</div></div>
-        <div class="modal-metric"><div class="mv" style="color:var(--${parseFloat(e.mood)>=8?'green':parseFloat(e.mood)>=5?'yellow':'red'})">${e.mood||'—'}/10</div><div class="ml">Internal State</div></div>
-      </div>
-      ${e.mentalSharp ? `<div style="margin-top:8px;font-size:13px;color:var(--muted);">Mental: <span style="color:var(--text)">${e.mentalSharp}</span></div>` : ''}
-      ${e.compFeel ? `<div style="margin-top:4px;font-size:13px;color:var(--muted);">Competitive Feel: <span style="color:var(--text)">${e.compFeel}</span></div>` : ''}
-    </div>
-
-    <div class="modal-section">
-      <div class="modal-section-title">Protocol Compliance — ${compliance}%</div>
-      <div style="background:var(--deep);border-radius:6px;height:6px;margin-bottom:10px;overflow:hidden;">
-        <div style="height:100%;width:${compliance}%;background:${compliance>=80?'var(--green)':compliance>=60?'var(--yellow)':'var(--red)'};border-radius:6px;transition:width 0.5s;"></div>
-      </div>
-      ${doneChecks.length ? `<div style="font-size:12px;color:var(--green);">${doneChecks.map(c=>'✓ '+c.label).join('<br>')}</div>` : ''}
-    </div>
-
-    ${e.notes ? `<div class="modal-section"><div class="modal-section-title">Notes</div><div style="font-size:13px;color:var(--muted);line-height:1.7;">${e.notes}</div></div>` : ''}
-  `;
-
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function closeModal(event) {
-  if (!event || event.target === document.getElementById('modal-overlay')) {
-    document.getElementById('modal-overlay').classList.remove('open');
-  }
-}
-
-// ── RENDER WEEKLY ─────────────────────────────────────
-function renderWeekly() {
-  const container = document.getElementById('weekly-content');
-  const recent = entries.slice(0, 7);
-
-  if (recent.length < 3) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><p>Log at least 3 entries to see your weekly summary and pattern analysis.</p></div>`;
-    return;
-  }
-
-  const avg = (key) => {
-    const vals = recent.map(e => parseFloat(e[key])).filter(v => !isNaN(v));
-    return vals.length ? (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1) : '—';
-  };
-
-  const avgHrv = avg('hrv');
-  const avgRec = avg('recovery');
-  const avgSleep = avg('sleepScore');
-  const avgPerf = avg('perf');
-  const avgEnergy = avg('energy');
-  const avgStrain = avg('strain');
-
-  const allChecks = recent.flatMap(e => e.checks || []);
-  const compliance = allChecks.length ? Math.round((allChecks.filter(c=>c.done).length / allChecks.length) * 100) : 0;
-
-  // Pattern detection
-  const patterns = [];
-  const flags = [];
-
-  if (parseFloat(avgHrv) >= 70) patterns.push('HRV averaging ' + avgHrv + ' — nervous system recovering well');
-  else flags.push('HRV averaging ' + avgHrv + ' — below optimal. Check sleep timing and Wednesday bedtime protocol');
-
-  if (parseFloat(avgRec) >= 80) patterns.push('Recovery averaging ' + avgRec + '% — body absorbing load effectively');
-  else flags.push('Recovery averaging ' + avgRec + '% — cumulative load not clearing. Prioritize Thursday sleep');
-
-  if (compliance >= 75) patterns.push('Protocol compliance at ' + compliance + '% — strong discipline this week');
-  else if (compliance >= 50) flags.push('Protocol compliance at ' + compliance + '% — identify which items are being skipped and why');
-  else flags.push('Protocol compliance at ' + compliance + '% — the system only works if it\'s being executed');
-
-  if (parseFloat(avgPerf) >= 7.5) patterns.push('Performance averaging ' + avgPerf + '/10 — translating prep into output');
-
-  const highRespDays = recent.filter(e => parseFloat(e.resp) > 15).length;
-  if (highRespDays >= 2) flags.push('Elevated respiratory rate on ' + highRespDays + ' days — monitor for early illness or overtraining signal');
-
-  container.innerHTML = `
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-title">7-Day Averages</div>
-      <div class="grid-3" style="gap:8px;">
-        <div class="summary-stat">
-          <div class="val" style="color:var(--${hrvClass(avgHrv)})">${avgHrv}</div>
-          <div class="lbl">Avg HRV</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--${recClass(avgRec)})">${avgRec}${avgRec!=='—'?'%':''}</div>
-          <div class="lbl">Avg Recovery</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--${recClass(avgSleep)})">${avgSleep}${avgSleep!=='—'?'%':''}</div>
-          <div class="lbl">Avg Sleep</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--${parseFloat(avgPerf)>=8?'green':parseFloat(avgPerf)>=6?'yellow':'red'})">${avgPerf}${avgPerf!=='—'?'/10':''}</div>
-          <div class="lbl">Avg Perf</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--yellow)">${avgStrain}</div>
-          <div class="lbl">Avg Strain</div>
-        </div>
-        <div class="summary-stat">
-          <div class="val" style="color:var(--${compliance>=75?'green':compliance>=50?'yellow':'red'})">${compliance}%</div>
-          <div class="lbl">Protocol</div>
-        </div>
-      </div>
-    </div>
-
-    ${patterns.length ? `
-    <div class="section-label" style="margin-top:4px;">Positive Patterns</div>
-    <div class="card" style="margin-bottom:16px;">
-      ${patterns.map(p => `
-        <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);">
-          <span style="color:var(--green);font-size:16px;flex-shrink:0;">↑</span>
-          <span>${p}</span>
-        </div>
-      `).join('').replace(/border-bottom[^}]+}<\/div>\s*$/, '</div>')}
-    </div>` : ''}
-
-    ${flags.length ? `
-    <div class="section-label">Red Flags</div>
-    <div class="card" style="margin-bottom:16px;">
-      ${flags.map(f => `
-        <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);">
-          <span style="color:var(--red);font-size:16px;flex-shrink:0;">⚠</span>
-          <span>${f}</span>
-        </div>
-      `).join('').replace(/border-bottom[^}]+}<\/div>\s*$/, '</div>')}
-    </div>` : ''}
-
-    <div class="section-label">Entry Count</div>
-    <div class="card">
-      <div style="font-size:13px;color:var(--muted);">Showing last <span style="color:var(--gold);font-weight:600;">${recent.length}</span> entries. Log consistently every day — pattern recognition requires volume.</div>
-    </div>
-  `;
-}
-
-// ── DAILY CHECKLIST DATA ──────────────────────────────
-const DAY_HABITS = {
-  'MON — OFF': [
-    { cat: '🌅 Morning', items: ['500ml water on wake', 'Sunlight within 30 min', 'Heart Anchor — 60 sec (5.5 breath)', 'Bible study', 'Journaling — gratitude + presuppositions'] },
-    { cat: '🏃 Active Recovery', items: ['20-min walk — nasal breathing only', '10-15 min mobility: hips, ankles, thoracic spine', 'Contrast shower (3-4 rounds)'] },
-    { cat: '🍽️ Nutrition', items: ['Anti-inflammatory breakfast', 'Protein target 190g+ hit', '3-4L hydration'] },
-    { cat: '🧠 Mindset', items: ['Dispenza meditation', 'HeartMath / 5.5 breathing session', 'Evening review — 3 in / 3 out', 'Sacred silence — 5 min'] },
-    { cat: '😴 Sleep', items: ['Magnesium glycinate taken', 'Hard bedtime 11:00 PM', 'No screens 60 min before bed'] },
-  ],
-  'TUE — HEAVY': [
-    { cat: '🌅 Morning', items: ['500ml water on wake', 'Sunlight within 30 min', 'Heart Anchor — 60 sec (5.5 breath)', 'Bible study', 'Journaling — gratitude + presuppositions', 'Breakfast: shake + oats + banana + berries'] },
-    { cat: '🏋️ Lift & Practice', items: ['Post-lift bridge shake (1 scoop + fruit)', 'Electrolytes during practice', 'Pre-practice meal timed (12:00–12:30 PM)', 'Pre-practice Zoe declaration', 'Post-practice nutrition within 30 min'] },
-    { cat: '💊 Supplements', items: ['Creatine taken', 'Omega-3 taken', 'Tart cherry juice post-practice', 'Magnesium glycinate before bed'] },
-    { cat: '🍽️ Nutrition', items: ['Protein target 190g+ hit', 'Carb target 450-500g hit', 'Full dinner within 2 hrs post-practice'] },
-    { cat: '🧠 Mindset', items: ['Heart Anchor morning', 'Dispenza / HeartMath post-practice', 'Evening review — 3 in / 3 out', 'Sacred silence — 5 min'] },
-    { cat: '😴 Sleep', items: ['Hard bedtime 11:00 PM', 'No screens 60 min before bed', 'Magnesium taken ✓'] },
-  ],
-  'WED — LATE': [
-    { cat: '🌅 Morning', items: ['500ml water on wake', 'Heart Anchor — 60 sec (5.5 breath)', 'Bible study', 'Journaling — gratitude + presuppositions', 'Breakfast eaten pre-lift'] },
-    { cat: '🏋️ Lift', items: ['Post-lift bridge shake (1 scoop + fruit)', 'Paraxanthine: HARD CUTOFF 2:00 PM max'] },
-    { cat: '🌆 Pre-Practice (5-6 PM)', items: ['FULL MEAL eaten 5:00–6:00 PM (this is dinner)', 'Electrolytes packed for practice'] },
-    { cat: '🏀 Practice (7:30–9:30 PM)', items: ['Electrolytes during practice', 'Pre-practice Zoe declaration'] },
-    { cat: '🌙 Post-Practice (10:45 PM)', items: ['Lights down immediately on arriving home', 'Recovery snack only if hungry (no heavy food)', 'No stimulating content / screens'] },
-    { cat: '💊 Wind Down', items: ['Magnesium glycinate taken', 'Tart cherry juice', 'HeartMath / 5.5 breathing — 5 min', 'Prayer / Zoe evening practice'] },
-    { cat: '😴 Sleep', items: ['HARD BEDTIME 12:15 AM — non-negotiable', 'Protein target 190g+ hit'] },
-  ],
-  'THU — HEAVY': [
-    { cat: '🌅 Morning', items: ['500ml water on wake', 'Heart Anchor — 60 sec (5.5 breath)', 'Bible study + journaling', 'Breakfast within 45 min of wake — carb emphasis', 'HRV logged'] },
-    { cat: '🏋️ Lift & Practice', items: ['Post-lift bridge shake', 'Pre-practice meal timed correctly', '10-min visualization / prayer before practice', 'Pre-practice Zoe declaration', 'Post-practice nutrition within 30 min — most important window of week'] },
-    { cat: '🔄 Recovery (Post-Practice)', items: ['Contrast shower — 3-4 rounds', 'Magnesium spray on legs + back', 'Legs up wall — 15-20 min', 'Dispenza meditation during legs up wall'] },
-    { cat: '💊 Supplements', items: ['Tart cherry juice', 'Magnesium glycinate taken', 'Omega-3 taken'] },
-    { cat: '🍽️ Nutrition', items: ['Protein target 190g+ hit', 'Carb target 450-500g hit', 'Full dinner within 2 hrs post-practice'] },
-    { cat: '😴 Sleep', items: ['HARD BEDTIME 11:00 PM — most performance-predictive sleep of week', 'No screens 60 min before bed'] },
-  ],
-  'FRI — LIGHT': [
-    { cat: '🌅 Morning', items: ['500ml water on wake', 'Heart Anchor — 60 sec', 'Bible study + journaling', 'HRV check — Thursday recovery report card'] },
-    { cat: '🏋️ Lift & Practice', items: ['Post-lift bridge shake', 'Light practice — no extra voluntary work', 'Pre-practice Zoe declaration'] },
-    { cat: '🍽️ Nutrition', items: ['Carb loading begins today', 'Familiar foods only — approaching game weekend', 'Protein target 190g+ hit', 'Chef dinner: pasta + protein (simple)'] },
-    { cat: '🧠 Mindset', items: ['Mental prep begins: visualization, film, competition mindset', 'Dispenza / HeartMath session', 'Full Zoe Protocol evening', 'Sacred silence'] },
-    { cat: '😴 Sleep', items: ['HARD BEDTIME 10:30–11:00 PM', 'Magnesium glycinate', 'No screens after 9:30 PM'] },
-  ],
-  'FRI — MOD': [
-    { cat: '🌅 Morning', items: ['500ml water on wake', 'Heart Anchor — 60 sec', 'Bible study + journaling', 'HRV check'] },
-    { cat: '🏋️ Lift & Practice', items: ['Post-lift bridge shake', 'Moderate practice — Saturday is activation day', 'Pre-practice Zoe declaration', 'Post-practice nutrition within 30 min'] },
-    { cat: '🍽️ Nutrition', items: ['Protein + carb balance today', 'Protein target 190g+ hit', 'Chef dinner: quality protein + carbs'] },
-    { cat: '🧠 Mindset', items: ['Dispenza / HeartMath session', 'Evening review', 'Sacred silence'] },
-    { cat: '😴 Sleep', items: ['Hard bedtime 11:00 PM', 'Magnesium glycinate'] },
-  ],
-  'SAT — GAME': [
-    { cat: '🌅 Morning', items: ['Natural wake — no alarm', '500ml water + electrolytes immediately', 'Sunlight within 30 min', 'HRV logged', 'Game day breakfast: shake + oats + banana (no kefir)'] },
-    { cat: '🧠 Pre-Game Mental', items: ['Optional 15-20 min walk — nasal breathing', 'Dispenza + visualization + prayer (10:00 AM)', 'Walk through game mentally — feel it, not just see it'] },
-    { cat: '🍽️ Pre-Travel Meal (11:00 AM)', items: ['100-120g carbs / 35-40g protein / low fat + fiber', 'Familiar food only — nothing new today', 'Packed: electrolytes, banana/dates, headphones'] },
-    { cat: '🚌 Bus (12:15 PM)', items: ['Sipping electrolytes on bus', 'Mental decompression first 30 min', 'Light visualization final 30 min before arrival'] },
-    { cat: '⚡ Venue Arrival', items: ['3:30 PM — PARAXANTHINE taken', '4:00 PM — Extended warm up', '4:30 PM — Last carb hit (banana/dates)', '5:30 PM — Locker room Zoe declaration + release outcome'] },
-    { cat: '🔄 Post-Game', items: ['Protein + carbs within 30 min of final buzzer', '500ml water + electrolytes on bus', 'Begin parasympathetic shift — nasal breathing, calm', 'Full recovery dinner at home', 'Magnesium + tart cherry', 'HeartMath 10 min post-game', 'Prayer — release the game', 'Bedtime by 12:00–12:30 AM'] },
-  ],
-  'SAT — LIGHT': [
-    { cat: '🌅 Morning', items: ['500ml water on wake', 'Sunlight within 30 min', 'Heart Anchor — 60 sec', 'Bible study + journaling', 'HRV logged', 'Breakfast — begin carb load'] },
-    { cat: '🍽️ Pre-Practice Meal (11:00 AM)', items: ['Full meal — protein + carbs', 'Hydration loading begun'] },
-    { cat: '🏀 Light Practice (2:30 PM)', items: ['Activation only — no extra work', 'Pre-practice Zoe declaration', 'Post-practice bridge snack (4:00–4:30 PM)'] },
-    { cat: '🌆 Evening', items: ['Chef dinner 6:00–7:00 PM — PRIMARY carb load', 'Pasta + lean protein, simple prep, nothing new'] },
-    { cat: '🧠 Pre-Game Night', items: ['Wind down begins 8:00 PM', 'HeartMath + Zoe prayer 9:30 PM', 'Visualization: walk through Sunday game'] },
-    { cat: '😴 Critical Sleep', items: ['HARD BEDTIME 10:30 PM — most important sleep of week', 'Magnesium glycinate', 'Tart cherry juice', 'No screens after 8:00 PM'] },
-  ],
-  'SUN — GAME': [
-    { cat: '🌅 Morning', items: ['Natural wake', '500ml water + electrolytes immediately', 'Sunlight within 30 min', 'HRV logged', 'Game day breakfast: shake + oats + banana (no kefir)'] },
-    { cat: '🧠 Pre-Game Mental', items: ['Optional 15-20 min walk — nasal breathing', 'Dispenza + visualization + prayer (10:00 AM)', 'Walk through game mentally — feel it'] },
-    { cat: '🍽️ Pre-Travel Meal (11:00 AM)', items: ['100-120g carbs / 35-40g protein / low fat + fiber', 'Familiar food only', 'Packed: electrolytes, banana/dates, headphones'] },
-    { cat: '🚌 Bus (12:15 PM)', items: ['Sipping electrolytes', 'Mental decompression — protect headspace'] },
-    { cat: '⚡ Venue Arrival', items: ['3:30 PM — PARAXANTHINE taken', '4:00 PM — Extended warm up', '4:30 PM — Last carb hit', '5:30 PM — Locker room Zoe declaration + release outcome'] },
-    { cat: '🔄 Post-Game', items: ['Protein + carbs within 30 min', '500ml water + electrolytes on bus', 'Full recovery dinner at home', 'Magnesium + tart cherry', 'HeartMath 10 min', 'Prayer — release the game', 'Bedtime 12:00–12:30 AM'] },
-  ],
-  'SUN — OFF': [
-    { cat: '🌅 Morning', items: ['Sleep until natural wake', '500ml water on wake', 'Sunlight within 30 min', 'Heart Anchor — 60 sec', 'Bible study + journaling'] },
-    { cat: '🏃 Active Recovery', items: ['20-min walk — nasal breathing', 'Mobility work: hips, ankles, thoracic spine', 'Contrast shower'] },
-    { cat: '🍽️ Nutrition', items: ['Anti-inflammatory focus', 'Omega-3 rich foods', 'Protein target 190g+ hit', '3-4L hydration'] },
-    { cat: '🧠 Mindset', items: ['Reflect on Saturday performance — log entry', 'Dispenza meditation', 'Full Zoe weekly audit', 'Sacred silence'] },
-    { cat: '😴 Sleep', items: ['Magnesium glycinate', 'Hard bedtime 11:00 PM'] },
-  ],
-};
-
-// ── RENDER CHECKLIST ──────────────────────────────────
-function renderChecklist() {
-  const dayType = document.getElementById('checklist-day-type').value;
-  const body = document.getElementById('checklist-body');
-  const saveWrap = document.getElementById('checklist-save-wrap');
-
-  if (!dayType || !DAY_HABITS[dayType]) {
-    body.innerHTML = `<div class="empty-state"><div class="empty-icon">☑️</div><p>Select your day type above<br>to load today\'s protocol checklist.</p></div>`;
-    saveWrap.style.display = 'none';
-    return;
-  }
-
-  const sections = DAY_HABITS[dayType];
-  body.innerHTML = sections.map(section => `
-    <div class="section-label">${section.cat}</div>
-    <div class="card" style="margin-bottom:16px;">
-      <div class="checklist">
-        ${section.items.map(item => `
-          <div class="check-item" onclick="toggleCheck(this); updateChecklistProgress()">
-            <div class="check-box">✓</div>
-            <div class="check-text">${item}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-
-  saveWrap.style.display = 'block';
-  updateChecklistProgress();
-}
-
-function updateChecklistProgress() {
-  const all = document.querySelectorAll('#checklist-body .check-item');
-  const done = document.querySelectorAll('#checklist-body .check-item.checked');
-  const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
-  document.getElementById('checklist-pct').textContent = pct + '%';
-  const bar = document.getElementById('checklist-progress-bar');
-  bar.style.width = pct + '%';
+  var bar = document.getElementById('habit-bar');
+  bar.style.width      = pct + '%';
   bar.style.background = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--yellow)' : 'var(--red)';
 }
 
-// ── SAVE CHECKLIST ────────────────────────────────────
-function saveChecklist() {
-  const dayType = document.getElementById('checklist-day-type').value;
-  const all = document.querySelectorAll('#checklist-body .check-item');
-  const checks = [];
-  all.forEach(item => {
-    checks.push({
-      label: item.querySelector('.check-text').textContent,
-      done: item.classList.contains('checked')
-    });
-  });
-
-  const done = checks.filter(c => c.done).length;
-  const pct = all.length ? Math.round((done / all.length) * 100) : 0;
-
-  const payload = {
-    dateLabel: document.getElementById('checklist-date-label').textContent,
-    dayType: dayType,
-    protocolCompliance: pct + '%',
-    notes: 'Checklist log — ' + done + '/' + all.length + ' habits completed',
-    checklistOnly: true,
-    checks: checks,
-    hrv: '', recovery: '', strain: '', sleepScore: '',
-    sleepHrs: '', rhr: '', resp: '', deepSleep: '',
-    energy: '', soreness: '', perf: '', mentalSharp: '',
-    compFeel: '', mood: ''
-  };
-
-  const btn = document.getElementById('checklist-save-btn');
-  btn.textContent = 'SYNCING...';
-  btn.style.background = 'var(--blue)';
+// ─────────────────────────────────────────────────────────────
+//  SAVE LOG → SHEETS
+// ─────────────────────────────────────────────────────────────
+function saveLog() {
+  var btn = document.getElementById('log-save-btn');
+  btn.textContent = 'SAVING...';
   btn.disabled = true;
 
-  // Save locally
-  entries.unshift({ id: Date.now(), date: new Date().toISOString(), ...payload });
-  localStorage.setItem('rd33_entries', JSON.stringify(entries));
+  var now = new Date();
+  var row = [
+    now.toISOString(),
+    now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' }).toUpperCase(),
+    document.getElementById('log-day-type').value,
+    document.getElementById('hrv').value,
+    document.getElementById('recovery').value,
+    document.getElementById('strain').value,
+    document.getElementById('sleep-score').value,
+    document.getElementById('sleep-hrs').value,
+    document.getElementById('rhr').value,
+    document.getElementById('resp').value,
+    document.getElementById('deep-sleep').value,
+    document.getElementById('energy').value,
+    document.getElementById('soreness').value,
+    document.getElementById('joint-notes').value,
+    document.getElementById('perf').value,
+    document.getElementById('mood').value,
+    document.getElementById('mental-sharp').value,
+    document.getElementById('comp-feel').value,
+    document.getElementById('food-breakfast').value,
+    document.getElementById('food-lunch').value,
+    document.getElementById('food-dinner').value,
+    document.getElementById('food-snacks').value,
+    document.getElementById('protein-est').value,
+    document.getElementById('hydration').value,
+    document.getElementById('notes').value
+  ];
 
-  // Sync to sheets
   fetch(SHEETS_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ action: 'logEntry', row: row })
   })
-  .then(() => {
-    showToast('✓ Checklist saved to Google Sheets');
-    btn.textContent = 'SAVE CHECKLIST TO SHEET';
-    btn.style.background = '';
-    btn.disabled = false;
-  })
-  .catch(() => {
-    showToast('✓ Saved locally — check connection');
-    btn.textContent = 'SAVE CHECKLIST TO SHEET';
-    btn.style.background = '';
+  .then(function()  { showToast('Entry saved to Sheets!'); resetLog(); })
+  .catch(function() { showToast('Saved locally — sync when online'); resetLog(); })
+  .finally(function() {
+    btn.textContent = 'SAVE ENTRY \u2192 SHEETS';
     btn.disabled = false;
   });
 }
-</script>
 
-<script>
-// ── SERVICE WORKER REGISTRATION ───────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    // Inline service worker as blob URL — no separate sw.js file needed
-    const swCode = `
-const CACHE = 'rd33-v1';
-const ASSETS = [location.href];
+// ─────────────────────────────────────────────────────────────
+//  SAVE HABITS → SHEETS
+// ─────────────────────────────────────────────────────────────
+function saveHabits() {
+  var btn = document.getElementById('habit-save-btn');
+  btn.textContent = 'SAVING...';
+  btn.disabled = true;
 
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(cache => {
-      return fetch(location.href).then(r => cache.put(location.href, r)).catch(() => {});
-    })
-  );
-  self.skipWaiting();
-});
+  var dayType = document.getElementById('habit-day-type').value;
+  var all     = document.querySelectorAll('#habits-list .check-item');
+  var done    = document.querySelectorAll('#habits-list .check-item.checked');
+  var total   = all.length;
+  var doneN   = done.length;
+  var pct     = total ? Math.round((doneN / total) * 100) : 0;
 
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
+  var doneList    = [];
+  var missingList = [];
+  all.forEach(function(item) {
+    var title = item.querySelector('.check-title').textContent;
+    if (item.classList.contains('checked')) doneList.push(title);
+    else missingList.push(title);
+  });
 
-self.addEventListener('fetch', e => {
-  // Always try network first for Google Sheets sync, cache fallback for app shell
-  if (e.request.url.includes('script.google.com')) {
-    e.respondWith(fetch(e.request).catch(() => new Response(JSON.stringify({status:'offline'}), {headers:{'Content-Type':'application/json'}})));
-    return;
-  }
-  if (e.request.url.includes('fonts.googleapis.com') || e.request.url.includes('fonts.gstatic.com')) {
-    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(nr => {
-      const clone = nr.clone();
-      caches.open(CACHE).then(c => c.put(e.request, clone));
-      return nr;
-    })));
-    return;
-  }
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-});
-`;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl, { scope: './' })
-      .then(() => console.log('RD33 SW registered'))
-      .catch(err => console.log('SW reg failed:', err));
+  var row = [
+    new Date().toISOString(),
+    new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' }).toUpperCase(),
+    dayType,
+    doneN + '/' + total,
+    pct + '%',
+    doneList.join(' | '),
+    missingList.join(' | ')
+  ];
+
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'logHabits', row: row })
+  })
+  .then(function()  { showToast('Habits saved — ' + pct + '% compliance'); })
+  .catch(function() { showToast('Saved — ' + pct + '% compliance'); })
+  .finally(function() {
+    btn.textContent = 'SAVE HABITS \u2192 SHEETS';
+    btn.disabled = false;
   });
 }
 
-// ── ADD TO HOME SCREEN PROMPT ─────────────────────────────────
-// Show iOS install instructions once if not in standalone mode
-window.addEventListener('load', function() {
-  const isStandalone = window.navigator.standalone === true;
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const dismissed = localStorage.getItem('rd33_install_dismissed');
-  
-  if (isIOS && !isStandalone && !dismissed) {
-    setTimeout(() => {
-      const banner = document.createElement('div');
-      banner.id = 'install-banner';
-      banner.innerHTML = `
-        <div style="position:fixed;bottom:0;left:0;right:0;background:#111827;border-top:1px solid #F59E0B;padding:16px 20px 32px;z-index:9999;display:flex;align-items:flex-start;gap:12px;">
-          <div style="font-size:28px;flex-shrink:0;">📲</div>
-          <div style="flex:1;">
-            <div style="font-family:'Bebas Neue',cursive;font-size:16px;color:#F59E0B;letter-spacing:1px;margin-bottom:4px;">ADD TO HOME SCREEN</div>
-            <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#9CA3AF;line-height:1.5;">Tap the <strong style="color:#E5E7EB;">Share button</strong> below, then tap <strong style="color:#E5E7EB;">"Add to Home Screen"</strong> to install RD33 as an app.</div>
-          </div>
-          <button onclick="document.getElementById('install-banner').remove();localStorage.setItem('rd33_install_dismissed','1');" 
-            style="background:none;border:none;color:#6B7280;font-size:20px;cursor:pointer;flex-shrink:0;padding:0 4px;">✕</button>
-        </div>
-      `;
-      document.body.appendChild(banner);
-    }, 2000);
-  }
-});
+// ─────────────────────────────────────────────────────────────
+//  RESET LOG FORM
+// ─────────────────────────────────────────────────────────────
+function resetLog() {
+  ['hrv','recovery','strain','sleep-score','sleep-hrs','rhr','resp',
+   'joint-notes','food-breakfast','food-lunch','food-dinner',
+   'food-snacks','protein-est','hydration','notes'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['deep-sleep','mental-sharp','comp-feel','log-day-type'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+  ['energy','soreness','perf','mood'].forEach(function(id) {
+    document.getElementById(id).value = 7;
+  });
+  updateSlider('energy',  'energy-val');
+  updateSlider('soreness','soreness-val');
+  updateSlider('perf',    'perf-val');
+  updateSlider('mood',    'mood-val');
+}
+
+// ─────────────────────────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
 </script>
 </body>
 </html>
